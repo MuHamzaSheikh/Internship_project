@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Business Card Scanner</string>
+    <string name="back_capture_prompt_title">Capture back side?</string>
+    <string name="back_capture_prompt_message">Would you like to capture the back side of this card?</string>
+    <string name="capture_back">Capture Back</string>
+    <string name="skip_back_capture">Skip</string>
+</resources>

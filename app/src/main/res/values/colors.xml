@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="PrimaryBlue">#4F6BFF</color>
+    <color name="Background">#FFFFFF</color>
+    <color name="Surface">#F8F9FA</color>
+    <color name="TextPrimary">#1C1C1C</color>
+    <color name="TextSecondary">#757575</color>
+
+    <!-- Existing project aliases -->
+    <color name="splashBlue">@color/PrimaryBlue</color>
+    <color name="colorPrimary">@color/PrimaryBlue</color>
+    <color name="colorAccent">@color/PrimaryBlue</color>
+    <color name="white">@color/Background</color>
+    <color name="black">#000000</color>
+    <color name="tabSelectedBackground">@color/PrimaryBlue</color>
+    <color name="tabUnselectedBackground">@color/Background</color>
+    <color name="tabSelectedText">@color/Background</color>
+    <color name="tabUnselectedText">@color/TextSecondary</color>
+    <color name="textColorPrimary">@color/TextPrimary</color>
+    <color name="textColorSecondary">@color/TextSecondary</color>
+    <color name="textColorHint">@color/TextSecondary</color>
+
+</resources>

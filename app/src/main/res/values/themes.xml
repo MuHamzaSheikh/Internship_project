@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.BusinessCardScanner" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/PrimaryBlue</item>
+        <item name="colorSecondary">@color/PrimaryBlue</item>
+        <item name="android:colorBackground">@color/Background</item>
+        <item name="colorSurface">@color/Surface</item>
+        <item name="android:windowBackground">@color/Background</item>
+        <item name="android:statusBarColor">@color/Background</item>
+        <item name="android:navigationBarColor">@color/Background</item>
+    </style>
+
+    <style name="Theme.BusinessCardScanner" parent="Base.Theme.BusinessCardScanner" />
+</resources>

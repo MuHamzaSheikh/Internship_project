@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_privacy"
+        android:icon="@drawable/ic_privacy"
+        android:title="Privacy Policy" />
+    <item
+        android:id="@+id/nav_share"
+        android:icon="@drawable/ic_share_friends"
+        android:title="Share with Friends" />
+    <item
+        android:id="@+id/nav_rate"
+        android:icon="@drawable/ic_rate_us"
+        android:title="Rate Us" />
+</menu>

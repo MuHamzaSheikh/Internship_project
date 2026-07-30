@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Margins -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">60dp</dimen>
+    <dimen name="toolbar_padding">8dp</dimen>
+
+    <!-- Card View -->
+    <dimen name="card_height">120dp</dimen>
+    <dimen name="card_corner_radius">18dp</dimen>
+    <dimen name="card_stroke_width">1dp</dimen>
+    <dimen name="card_margin_top">10dp</dimen>
+    <dimen name="card_icon_size">46dp</dimen>
+    
+    <!-- Tabs -->
+    <dimen name="tab_height">48dp</dimen>
+    <dimen name="tab_margin_top">14dp</dimen>
+    <dimen name="tab_margin_horizontal">12dp</dimen>
+
+    <!-- Text Sizes -->
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_medium">18sp</dimen>
+    <dimen name="text_size_regular">16sp</dimen>
+</resources>
