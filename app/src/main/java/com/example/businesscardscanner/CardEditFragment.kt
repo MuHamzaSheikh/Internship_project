@@ -20,8 +20,10 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 class CardEditFragment : Fragment() {
@@ -35,49 +37,56 @@ class CardEditFragment : Fragment() {
         fun onFinishFlow()
     }
 
+    private var _binding: com.example.businesscardscanner.databinding.FragmentCardEditBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_card_edit, container, false)
+    ): View {
+        _binding = com.example.businesscardscanner.databinding.FragmentCardEditBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val repository = BusinessCardRepository.getInstance(requireContext().applicationContext)
         val state = flowViewModel.state.value
         val cardId = arguments?.getString(ARG_CARD_ID)
             ?: requireActivity().intent.getStringExtra(ARG_CARD_ID)
-        val groupField = view.findViewById<MaterialAutoCompleteTextView>(R.id.etGroup)
-        val pager = view.findViewById<ViewPager2>(R.id.cardImagePager)
-        val previewContainer = view.findViewById<MaterialCardView>(R.id.cardPreviewContainer)
+        val groupField = binding.etGroup
+        val pager = binding.cardImagePager
+        val previewContainer = binding.cardPreviewContainer
         cardImagePagerAdapter = CardImagePagerAdapter(emptyList())
         pager.adapter = cardImagePagerAdapter
+        
+        (pager.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView)?.isNestedScrollingEnabled = false
 
         fun updateDots(count: Int, position: Int) {
-            val dots = view.findViewById<android.widget.TextView>(R.id.pageDots)
+            val dots = binding.pageDots
             dots.visibility = if (count > 1) View.VISIBLE else View.GONE
-            dots.text = if (count > 1) if (position == 0) "--  *" else "*  --" else ""
         }
 
         fun applyPreviewAspect(uri: android.net.Uri?) {
             if (uri == null) return
             val ratio = ImageAspectRatioUtils.getAspectRatio(requireContext(), uri).takeIf { it > 0f } ?: 1f
             val widthPx = previewContainer.width.takeIf { it > 0 }
-                ?: (resources.displayMetrics.widthPixels - (40 * resources.displayMetrics.density).roundToInt())
-            val heightPx = if (ratio >= 1f) {
-                (widthPx / ratio).roundToInt()
-            } else {
-                (widthPx / ratio).roundToInt()
-            }.coerceAtLeast((160 * resources.displayMetrics.density).roundToInt())
-            previewContainer.layoutParams = previewContainer.layoutParams.apply { this.height = heightPx }
-            previewContainer.requestLayout()
-            pager.layoutParams = pager.layoutParams.apply { this.height = heightPx }
-            pager.requestLayout()
+                ?: (resources.displayMetrics.widthPixels - (32 * resources.displayMetrics.density).roundToInt())
+            val heightPx = (widthPx / ratio).roundToInt().coerceAtLeast((160 * resources.displayMetrics.density).roundToInt())
+            
+            if (previewContainer.layoutParams.height != heightPx) {
+                previewContainer.layoutParams = previewContainer.layoutParams.apply { this.height = heightPx }
+                previewContainer.requestLayout()
+                pager.layoutParams = pager.layoutParams.apply { this.height = heightPx }
+                pager.requestLayout()
+            }
         }
 
         fun bindImages(images: List<android.net.Uri?>) {
             currentImages = images
             cardImagePagerAdapter?.submitList(images)
             pager.setCurrentItem(0, false)
+            TabLayoutMediator(binding.pageDots, pager) { _, _ -> }.attach()
             updateDots(images.size, 0)
             previewContainer.post { applyPreviewAspect(images.firstOrNull()) }
         }
@@ -122,22 +131,53 @@ class CardEditFragment : Fragment() {
             bindFromState(view, state, ::bindImages)
         }
 
-        view.findViewById<View>(R.id.btnSaveCard).setOnClickListener {
+        viewLifecycleOwner.lifecycleScope.launch {
+            flowViewModel.state.collectLatest { currentState ->
+                if (currentState.isProcessing) {
+                    binding.ocrProgressBar.visibility = View.VISIBLE
+                    binding.formBlock.alpha = 0.5f
+                } else {
+                    binding.ocrProgressBar.visibility = View.GONE
+                    binding.formBlock.alpha = 1.0f
+                    if (cardId == null && (currentState.frontOcrResult != null || currentState.backOcrResult != null || currentState.ocrResult != null)) {
+                        bindFromState(view, currentState, ::bindImages)
+                    }
+                }
+            }
+        }
+        
+        setupQuickActions(view)
+
+        binding.btnSaveCard.setOnClickListener {
             val selectedGroup = groupField.text?.toString().orEmpty().ifBlank { "VIP" }
             viewLifecycleOwner.lifecycleScope.launch {
                 repository.saveCategory(selectedGroup)
-                val current = existingCard
-                val card = BusinessCard(
+                val card = existingCard?.copy(
+                    group = binding.etGroup.text.toString(),
+                    name = binding.etName.text.toString(),
+                    jobTitle = binding.etJob.text.toString(),
+                    company = binding.etCompany.text.toString(),
+                    phone = binding.etPhone.text.toString(),
+                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
+                    email = binding.etEmail.text.toString(),
+                    address = binding.etAddress.text.toString(),
+                    description = binding.etDescription.text.toString(),
+                    notes = binding.etNotes.text.toString(),
+                    updatedAt = System.currentTimeMillis()
+                ) ?: BusinessCard(
                     id = cardId ?: state.pendingCard?.id ?: BusinessCard().id,
-                    imageUri = current?.imageUri ?: state.frontImageUri ?: state.imageUri,
-                    backImageUri = current?.backImageUri ?: state.backImageUri,
-                    name = view.findViewById<EditText>(R.id.etName).text.toString(),
-                    jobTitle = view.findViewById<EditText>(R.id.etJob).text.toString(),
-                    company = view.findViewById<EditText>(R.id.etCompany).text.toString(),
-                    phone = view.findViewById<EditText>(R.id.etPhone).text.toString(),
-                    email = view.findViewById<EditText>(R.id.etEmail).text.toString(),
+                    imageUri = currentImages.getOrNull(0) ?: state.frontImageUri ?: state.imageUri,
+                    backImageUri = currentImages.getOrNull(1) ?: state.backImageUri,
+                    name = binding.etName.text.toString(),
+                    jobTitle = binding.etJob.text.toString(),
+                    company = binding.etCompany.text.toString(),
+                    phone = binding.etPhone.text.toString(),
+                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
+                    email = binding.etEmail.text.toString(),
                     website = state.ocrResult?.website?.value.orEmpty(),
-                    address = view.findViewById<EditText>(R.id.etAddress).text.toString(),
+                    address = binding.etAddress.text.toString(),
+                    description = binding.etDescription.text.toString(),
+                    notes = binding.etNotes.text.toString(),
                     group = selectedGroup,
                     qrText = state.qrText,
                     qrTimestamp = state.qrTimestamp,
@@ -150,8 +190,80 @@ class CardEditFragment : Fragment() {
             }
         }
 
-        view.findViewById<View>(R.id.btnBack).setOnClickListener {
+        binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+    }
+    
+    private fun setupQuickActions(view: View) {
+        val context = requireContext()
+        val etPhone = binding.etPhone
+        val etEmail = binding.etEmail
+        val etAddress = binding.etAddress
+        val etName = binding.etName
+        val etCompany = binding.etCompany
+        val etJob = binding.etJob
+
+        binding.btnActionCall.setOnClickListener {
+            val number = etPhone.text.toString().trim()
+            if (number.isNotBlank()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnActionSms.setOnClickListener {
+            val number = etPhone.text.toString().trim()
+            if (number.isNotBlank()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnActionCallSecondary.setOnClickListener {
+            val number = binding.etPhoneSecondary.text.toString().trim()
+            if (number.isNotBlank()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnActionSmsSecondary.setOnClickListener {
+            val number = binding.etPhoneSecondary.text.toString().trim()
+            if (number.isNotBlank()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnActionEmail.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            if (email.isNotBlank()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:$email"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No email app found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnActionMap.setOnClickListener {
+            val address = etAddress.text.toString().trim()
+            if (address.isNotBlank()) {
+                val encoded = android.net.Uri.encode(address)
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=$encoded"))
+                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
+            }
+        }
+        
+        binding.btnSaveToContacts.setOnClickListener {
+            val intent = android.content.Intent(android.content.Intent.ACTION_INSERT).apply {
+                type = android.provider.ContactsContract.Contacts.CONTENT_TYPE
+                putExtra(android.provider.ContactsContract.Intents.Insert.NAME, etName.text.toString().trim())
+                putExtra(android.provider.ContactsContract.Intents.Insert.COMPANY, etCompany.text.toString().trim())
+                putExtra(android.provider.ContactsContract.Intents.Insert.JOB_TITLE, etJob.text.toString().trim())
+                putExtra(android.provider.ContactsContract.Intents.Insert.PHONE, etPhone.text.toString().trim())
+                putExtra(android.provider.ContactsContract.Intents.Insert.EMAIL, etEmail.text.toString().trim())
+                putExtra(android.provider.ContactsContract.Intents.Insert.POSTAL, etAddress.text.toString().trim())
+            }
+            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No contacts app found", android.widget.Toast.LENGTH_SHORT).show() }
         }
     }
 
@@ -163,23 +275,33 @@ class CardEditFragment : Fragment() {
         bindImages(listOfNotNull(state.frontImageUri ?: state.imageUri, state.backImageUri))
         val front = state.frontOcrResult ?: state.ocrResult
         val back = state.backOcrResult
-        bindOcrField(view.findViewById(R.id.etGroup), pickField(front?.category, back?.category), defaultValue = "VIP")
-        bindOcrField(view.findViewById(R.id.etName), pickField(front?.name, back?.name))
-        bindOcrField(view.findViewById(R.id.etJob), pickField(front?.jobTitle, back?.jobTitle))
-        bindOcrField(view.findViewById(R.id.etCompany), pickField(front?.company, back?.company))
-        bindOcrField(view.findViewById(R.id.etPhone), pickField(front?.phone, back?.phone))
-        bindOcrField(view.findViewById(R.id.etEmail), pickField(front?.email, back?.email))
-        bindOcrField(view.findViewById(R.id.etAddress), pickField(front?.address, back?.address))
+        bindOcrField(binding.etGroup, pickField(front?.category, back?.category), defaultValue = "VIP")
+        bindOcrField(binding.etName, pickField(front?.name, back?.name))
+        bindOcrField(binding.etJob, pickField(front?.jobTitle, back?.jobTitle))
+        bindOcrField(binding.etCompany, pickField(front?.company, back?.company))
+        bindOcrField(binding.etPhone, pickField(front?.phone, back?.phone))
+        bindOcrField(binding.etPhoneSecondary, pickField(front?.phoneSecondary, back?.phoneSecondary))
+        bindOcrField(binding.etEmail, pickField(front?.email, back?.email))
+        bindOcrField(binding.etAddress, pickField(front?.address, back?.address))
+        bindOcrField(binding.etDescription, pickField(front?.description, back?.description))
     }
 
     private fun bindCard(view: View, card: BusinessCard) {
-        view.findViewById<EditText>(R.id.etGroup).setText(card.group.ifBlank { "VIP" })
-        view.findViewById<EditText>(R.id.etName).setText(card.name)
-        view.findViewById<EditText>(R.id.etJob).setText(card.jobTitle)
-        view.findViewById<EditText>(R.id.etCompany).setText(card.company)
-        view.findViewById<EditText>(R.id.etPhone).setText(card.phone)
-        view.findViewById<EditText>(R.id.etEmail).setText(card.email)
-        view.findViewById<EditText>(R.id.etAddress).setText(card.address)
+        binding.etGroup.setText(card.group.ifBlank { "VIP" }, false)
+        binding.etName.setText(card.name)
+        binding.etJob.setText(card.jobTitle)
+        binding.etCompany.setText(card.company)
+        binding.etPhone.setText(card.phone)
+        binding.etPhoneSecondary.setText(card.phoneSecondary)
+        binding.etEmail.setText(card.email)
+        binding.etAddress.setText(card.address)
+        binding.etDescription.setText(card.description)
+        binding.etNotes.setText(card.notes)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun bindOcrField(editText: EditText, field: OcrField?, defaultValue: String? = null) {
@@ -189,9 +311,6 @@ class CardEditFragment : Fragment() {
             editText.setText(value)
         } else if (current.isBlank() && defaultValue != null) {
             editText.setText(defaultValue)
-        }
-        if ((field?.confidence ?: 100) < 70 && field?.value?.isNotBlank() == true) {
-            editText.backgroundTintList = ContextCompat.getColorStateList(requireContext(), android.R.color.holo_orange_light)
         }
     }
 

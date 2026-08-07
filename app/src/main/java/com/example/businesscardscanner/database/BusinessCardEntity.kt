@@ -27,6 +27,8 @@ data class BusinessCardEntity(
     val deletedAt: Long?,
     val ocrText: String,
     val notes: String,
+    val description: String,
+    val phoneSecondary: String,
     val category: String
 )
 
@@ -50,6 +52,8 @@ fun BusinessCardEntity.toModel() = BusinessCard(
     qrTimestamp = qrTimestamp,
     ocrText = ocrText,
     notes = notes,
+    description = description,
+    phoneSecondary = phoneSecondary,
     category = category
 )
 
@@ -59,6 +63,8 @@ fun BusinessCard.toEntity(
     deletedAt: Long? = null,
     ocrText: String = this.ocrText,
     notes: String = this.notes,
+    description: String = this.description,
+    phoneSecondary: String = this.phoneSecondary,
     category: String = this.category
 ) = BusinessCardEntity(
     id = id,
@@ -81,5 +87,7 @@ fun BusinessCard.toEntity(
     deletedAt = deletedAt,
     ocrText = ocrText,
     notes = notes,
+    description = description,
+    phoneSecondary = phoneSecondary,
     category = category
 )

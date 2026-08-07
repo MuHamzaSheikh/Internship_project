@@ -32,6 +32,9 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.view.animation.LinearInterpolator
 
 class QrScanFragment : Fragment() {
     interface FlowHost {
@@ -47,6 +50,7 @@ class QrScanFragment : Fragment() {
     private var analyzerFrameCount = 0
     private var surfaceStreamingLogged = false
     private var analysisExecutor: ExecutorService? = null
+    private var scanBeamAnimator: ObjectAnimator? = null
     private val startInGallery by lazy { arguments?.getBoolean(ARG_START_IN_GALLERY, false) == true }
 
     private val galleryPicker = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -77,15 +81,18 @@ class QrScanFragment : Fragment() {
         }
     }
 
+    private var _binding: com.example.businesscardscanner.databinding.FragmentQrScanBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_qr_scan, container, false)
+        _binding = com.example.businesscardscanner.databinding.FragmentQrScanBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val previewContainer = view.findViewById<ViewGroup>(R.id.qrPreviewContainer)
+        val previewContainer = binding.qrPreviewContainer
         val previewView = PreviewView(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         }
         val overlay = ImageView(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -105,32 +112,48 @@ class QrScanFragment : Fragment() {
         previewContainer.addView(previewView)
         previewContainer.addView(overlay)
 
-        view.findViewById<View>(R.id.btnGallery).setOnClickListener {
+        binding.root.findViewById<View>(R.id.btnLeftAction)?.setOnClickListener {
             flowViewModel.setCaptureMode(CaptureMode.QR)
             (activity as? FlowHost)?.onGalleryRequested()
         }
-        view.findViewById<View>(R.id.btnDone).setOnClickListener {
+        binding.root.findViewById<View>(R.id.btnDone)?.setOnClickListener {
             if (scanned) {
                 (activity as? FlowHost)?.onQrScanDone()
             } else {
                 android.widget.Toast.makeText(requireContext(), "No QR code detected. Try again or switch to card capture.", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
-        view.findViewById<View>(R.id.btnScanQR).setOnClickListener {
+        binding.root.findViewById<View>(R.id.btnRightAction)?.setOnClickListener {
             flowViewModel.setCaptureMode(CaptureMode.CARD)
             (activity as? FlowHost)?.onScanCardRequested()
         }
-        view.findViewById<View>(R.id.btnBack).setOnClickListener {
+        binding.header.toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-        view.findViewById<ImageView>(R.id.btnRefresh).setOnClickListener {
+        binding.btnRefresh.setOnClickListener {
             cameraProvider?.unbindAll()
             flashEnabled = !flashEnabled
+            val iconRes = if (flashEnabled) R.drawable.ic_flash_on else R.drawable.ic_flash_off
+            binding.btnRefresh.setImageResource(iconRes)
             bindCamera(previewView, flashEnabled)
         }
         bindCamera(previewView, flashEnabled)
         if (startInGallery) {
             openGalleryPicker()
+        }
+
+        // Animated Scanning Beam
+        val scanBeam = binding.root.findViewById<View>(R.id.scanBeam)
+        scanBeam?.post {
+            val parentHeight = previewContainer.height.toFloat()
+            val beamHeight = scanBeam.height.toFloat()
+            scanBeamAnimator = ObjectAnimator.ofFloat(scanBeam, "translationY", 0f, parentHeight - beamHeight).apply {
+                duration = 2000
+                repeatCount = ValueAnimator.INFINITE
+                repeatMode = ValueAnimator.REVERSE
+                interpolator = LinearInterpolator()
+                start()
+            }
         }
     }
 
@@ -144,8 +167,18 @@ class QrScanFragment : Fragment() {
         providerFuture.addListener({
             val provider = providerFuture.get()
             cameraProvider = provider
-            val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
+            val previewResolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                .setResolutionStrategy(androidx.camera.core.resolutionselector.ResolutionStrategy(android.util.Size(1280, 720), androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER))
+                .build()
+            val preview = Preview.Builder()
+                .setResolutionSelector(previewResolutionSelector)
+                .build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
+                
+            val analysisResolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                .setResolutionStrategy(androidx.camera.core.resolutionselector.ResolutionStrategy(android.util.Size(640, 480), androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER))
+                .build()
             val analysis = ImageAnalysis.Builder()
+                .setResolutionSelector(analysisResolutionSelector)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             analysisExecutor?.shutdownNow()
@@ -158,10 +191,12 @@ class QrScanFragment : Fragment() {
                     val mediaImage = imageProxy.image
                     if (mediaImage == null) {
                         Log.w(TAG, "Analyzer frame #$frameNo has null mediaImage")
+                        imageProxy.close()
                         return@setAnalyzer
                     }
                     if (scanned) {
                         Log.d(TAG, "Analyzer frame #$frameNo skipped because already scanned")
+                        imageProxy.close()
                         return@setAnalyzer
                     }
                     val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
@@ -178,7 +213,9 @@ class QrScanFragment : Fragment() {
                                     flowViewModel.setOcrResult(parsed)
                                 }
                                 vibrate()
-                                (activity as? FlowHost)?.onQrScanDone()
+                                if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                                    (activity as? FlowHost)?.onQrScanDone()
+                                }
                             }
                         }
                         .addOnFailureListener { error ->
@@ -186,10 +223,10 @@ class QrScanFragment : Fragment() {
                         }
                         .addOnCompleteListener {
                             Log.d(TAG, "Analyzer frame #$frameNo completed")
+                            imageProxy.close()
                         }
                 } catch (t: Throwable) {
                     Log.e(TAG, "Analyzer frame #$frameNo crashed", t)
-                } finally {
                     imageProxy.close()
                 }
             }
@@ -224,10 +261,13 @@ class QrScanFragment : Fragment() {
 
     override fun onDestroyView() {
         Log.d(TAG, "onDestroyView unbinding camera and shutting down executor")
+        scanBeamAnimator?.cancel()
+        scanBeamAnimator = null
         cameraProvider?.unbindAll()
         analysisExecutor?.shutdownNow()
         analysisExecutor = null
         super.onDestroyView()
+        _binding = null
     }
 
     companion object {

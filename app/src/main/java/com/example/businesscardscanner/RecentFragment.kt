@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.businesscardscanner.adapters.BusinessCardAdapter
+import com.example.businesscardscanner.databinding.FragmentCardListBinding
 import com.example.businesscardscanner.repository.BusinessCardRepository
 import com.example.businesscardscanner.dialogs.DeleteCardDialog
 import com.example.businesscardscanner.utils.CardActionUtils
@@ -21,16 +21,20 @@ import kotlinx.coroutines.launch
 
 class RecentFragment : Fragment() {
 
+    private var _binding: FragmentCardListBinding? = null
+    private val binding get() = _binding!!
+
     private var currentQuery: String = ""
     private var allCards: List<com.example.businesscardscanner.models.BusinessCard> = emptyList()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_card_list, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentCardListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val repository = BusinessCardRepository.getInstance(requireContext().applicationContext)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
@@ -38,8 +42,9 @@ class RecentFragment : Fragment() {
                     val recent = cards.sortedByDescending { it.createdAt }.take(5)
                     allCards = recent
                     val filtered = CardListSearchUtils.filter(recent, currentQuery)
-                    recyclerView.adapter = BusinessCardAdapter(
+                    binding.recyclerView.adapter = BusinessCardAdapter(
                         filtered,
+                        onCardClick = { startActivity(CardPreviewActivity.createIntent(requireContext(), it.id)) },
                         onEdit = { startActivity(CardWorkflowActivity.createIntent(requireContext(), CardWorkflowActivity.StartStep.CARD_EDIT, it.id)) },
                         onShare = { startActivity(Intent.createChooser(CardActionUtils.shareCard(requireContext(), it), "Share Card")) },
                         onSave = { card ->
@@ -76,10 +81,15 @@ class RecentFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     fun updateSearch(query: String) {
         currentQuery = query
-        if (view != null) {
-            (view?.findViewById<RecyclerView>(R.id.recyclerView)?.adapter as? BusinessCardAdapter)?.let { adapter ->
+        if (_binding != null) {
+            (binding.recyclerView.adapter as? BusinessCardAdapter)?.let { adapter ->
                 val filtered = CardListSearchUtils.filter(allCards, currentQuery)
                 adapter.updateItems(filtered)
             }

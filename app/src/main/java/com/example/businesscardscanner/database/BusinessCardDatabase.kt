@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [BusinessCardEntity::class, CategoryEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class BusinessCardDatabase : RoomDatabase() {
@@ -130,13 +130,20 @@ abstract class BusinessCardDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE business_cards ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE business_cards ADD COLUMN phoneSecondary TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun getInstance(context: Context): BusinessCardDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     BusinessCardDatabase::class.java,
                     "business_cards.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_5, MIGRATION_4_5).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_5, MIGRATION_4_5, MIGRATION_5_6).build().also { INSTANCE = it }
             }
         }
     }

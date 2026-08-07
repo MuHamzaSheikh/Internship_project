@@ -23,5 +23,7 @@ data class BusinessCard(
     val qrTimestamp: Long? = null,
     val ocrText: String = "",
     val notes: String = "",
+    val description: String = "",
+    val phoneSecondary: String = "",
     val category: String = ""
 )

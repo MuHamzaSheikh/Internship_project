@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 data class CardFlowState(
     val qrText: String? = null,
     val qrTimestamp: Long? = null,
+    val rawImageUri: Uri? = null,
     val imageUri: Uri? = null,
+    val ocrUri: Uri? = null,
     val frontImageUri: Uri? = null,
     val backImageUri: Uri? = null,
     val ocrResult: OcrResult? = null,
@@ -22,7 +24,16 @@ data class CardFlowState(
     val errorMessage: String? = null,
     val captureMode: CaptureMode = CaptureMode.CARD,
     val captureSide: CaptureSide = CaptureSide.FRONT
-)
+) {
+    /**
+     * DEDICATED OCR SOURCE:
+     * Represents the exact image OCR should read, decoupled from display/filter previews.
+     * Any future feature touching image processing must NOT redirect this function's output without explicit review.
+     */
+    fun getOcrSourceImage(): Uri? {
+        return ocrUri ?: imageUri
+    }
+}
 
 class CardFlowViewModel : ViewModel() {
     private val _state = MutableStateFlow(CardFlowState())
@@ -32,10 +43,15 @@ class CardFlowViewModel : ViewModel() {
         _state.value = _state.value.copy(qrText = text, qrTimestamp = System.currentTimeMillis())
     }
 
-    fun setImageUri(uri: Uri) {
+    fun setRawImageUri(uri: Uri) {
+        _state.value = _state.value.copy(rawImageUri = uri)
+    }
+
+    fun setImageUri(uri: Uri, ocrUri: Uri? = null) {
+        val finalOcrUri = ocrUri ?: uri
         when (_state.value.captureSide) {
-            CaptureSide.FRONT -> _state.value = _state.value.copy(imageUri = uri, frontImageUri = uri)
-            CaptureSide.BACK -> _state.value = _state.value.copy(imageUri = uri, backImageUri = uri)
+            CaptureSide.FRONT -> _state.value = _state.value.copy(imageUri = uri, ocrUri = finalOcrUri, frontImageUri = uri)
+            CaptureSide.BACK -> _state.value = _state.value.copy(imageUri = uri, ocrUri = finalOcrUri, backImageUri = uri)
         }
     }
 
@@ -84,17 +100,35 @@ class CardFlowViewModel : ViewModel() {
                 else -> backField
             }
         }
+        
+        val allStructuredValues = listOf(
+            pick(front.name, back.name).value,
+            pick(front.company, back.company).value,
+            pick(front.jobTitle, back.jobTitle).value,
+            pick(front.phone, back.phone).value,
+            pick(front.phoneSecondary, back.phoneSecondary).value,
+            pick(front.email, back.email).value,
+            pick(front.website, back.website).value,
+            pick(front.address, back.address).value
+        ).filter { it.isNotBlank() }.map { it.lowercase() }
+
+        val combinedDescription = listOfNotNull(front.description.value, back.description.value)
+            .filter { it.isNotBlank() }
+            .joinToString("\n\n")
+            .trim()
 
         return front.copy(
             name = pick(front.name, back.name),
             company = pick(front.company, back.company),
             jobTitle = pick(front.jobTitle, back.jobTitle),
             phone = pick(front.phone, back.phone),
+            phoneSecondary = pick(front.phoneSecondary, back.phoneSecondary),
             email = pick(front.email, back.email),
             website = pick(front.website, back.website),
             address = pick(front.address, back.address),
             category = pick(front.category, back.category),
             social = pick(front.social, back.social),
+            description = com.example.businesscardscanner.ocr.OcrField(combinedDescription, 80),
             rawText = listOf(front.rawText, back.rawText).filter { it.isNotBlank() }.joinToString("\n")
         )
     }

@@ -18,7 +18,7 @@ cameraX = "1.5.0"
 mlkitText = "16.0.1"
 mlkitBarcode = "17.3.0"
 viewPager2 = "1.1.0"
-
+opencv = "4.5.3.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -45,6 +45,7 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewPager2" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitText" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+opencv-android = { group = "com.quickbirdstudios", name = "opencv", version.ref = "opencv" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

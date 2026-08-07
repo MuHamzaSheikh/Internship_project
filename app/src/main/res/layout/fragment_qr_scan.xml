@@ -3,60 +3,57 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="#2E2E2E">
 
-    <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/ic_back"
-        android:contentDescription="@null"
-        app:layout_constraintStart_toStartOf="parent"
+    <include
+        android:id="@+id/header"
+        layout="@layout/view_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/txtTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Scanning Card"
-        android:textColor="@color/TextPrimary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+    <!-- Top icons below header -->
     <ImageView
         android:id="@+id/btnRefresh"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_refresh"
+        android:src="@drawable/ic_flash_off"
+        android:padding="12dp"
+        app:tint="#FFFFFF"
+        android:contentDescription="@null"
+        app:layout_constraintEnd_toStartOf="@+id/btnSwitchCard"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header" />
+
+    <ImageView
+        android:id="@+id/btnSwitchCard"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="24dp"
+        android:src="@drawable/ic_badge"
+        android:padding="12dp"
+        app:tint="#FFFFFF"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/btnRefresh"
+        app:layout_constraintTop_toBottomOf="@id/header" />
 
     <FrameLayout
         android:id="@+id/qrPreviewContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="18dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toBottomOf="@id/txtTitle"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintTop_toBottomOf="@id/btnRefresh"
         app:layout_constraintBottom_toTopOf="@id/bottomActions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_qrcode" />
+        <!-- The actual preview view gets injected dynamically here via QrScanFragment -->
 
         <ImageView
             android:id="@+id/overlayBrackets"
@@ -66,17 +63,26 @@
             android:importantForAccessibility="no"
             android:scaleType="fitCenter"
             android:src="@drawable/capture_corner_brackets" />
+
+        <!-- Animated Scanning Beam -->
+        <View
+            android:id="@+id/scanBeam"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_gravity="top"
+            android:background="@drawable/scan_beam_gradient"
+            android:visibility="visible" />
     </FrameLayout>
 
     <FrameLayout
         android:id="@+id/bottomActions"
-        android:layout_width="324dp"
+        android:layout_width="match_parent"
         android:layout_height="129dp"
         android:layout_marginBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-        <include layout="@layout/view_bottom_actions" />
+        <include layout="@layout/view_bottom_actions_scan_card" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,7 +24,7 @@
 
             <ImageView
                 android:id="@+id/imgRecycleCard"
-                android:layout_width="84dp"
+                android:layout_width="62dp"
                 android:layout_height="62dp"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"

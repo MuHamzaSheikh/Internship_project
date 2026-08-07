@@ -18,12 +18,13 @@ class RecycleBinActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recycle_bin)
-        findViewById<ImageView>(R.id.binBack).setOnClickListener {
+        val binding = com.example.businesscardscanner.databinding.ActivityRecycleBinBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.binBack.setOnClickListener {
             finish()
         }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerRecycleBin)
+        val recyclerView = binding.recyclerRecycleBin
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         lifecycleScope.launch {

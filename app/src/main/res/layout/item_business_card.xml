@@ -19,9 +19,9 @@
 
         <ImageView
             android:id="@+id/imgCard"
-            android:layout_width="78dp"
+            android:layout_width="62dp"
             android:layout_height="62dp"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:src="@drawable/card_reference"
             android:contentDescription="@null"
             app:layout_constraintStart_toStartOf="parent"
