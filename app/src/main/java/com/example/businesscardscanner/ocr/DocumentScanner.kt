@@ -114,9 +114,9 @@ object DocumentScanner {
                 pointsArray.filterNotNull().toTypedArray()
             }
             
-            // Border Rejection: If any point is within 1% of the edges, it's likely the camera frame
-            val marginX = originalMat.cols() * 0.01
-            val marginY = originalMat.rows() * 0.01
+            // Border Rejection: If any point is extremely close to the edges, it might be the camera frame itself
+            val marginX = originalMat.cols() * 0.005
+            val marginY = originalMat.rows() * 0.005
             var touchesBorder = false
             for (p in pointsToUse) {
                 if (p.x <= marginX || p.x >= originalMat.cols() - marginX || p.y <= marginY || p.y >= originalMat.rows() - marginY) {
@@ -153,8 +153,8 @@ object DocumentScanner {
             // Reject non-solid or concave shapes
             if (solidity < 0.85) continue
             
-            // Reject standard paper size (A4 ~1.414) and out-of-bounds ratios for business cards
-            if (aspectRatio < 1.45 || aspectRatio > 2.0) {
+            // Reject shapes that are wildly out of proportion for a card (even with perspective skew)
+            if (aspectRatio < 1.1 || aspectRatio > 3.0) {
                 continue
             }
             
@@ -207,7 +207,13 @@ object DocumentScanner {
         return candidates.filter { it.score > 0.4 }.take(3).map { orderPointsForPerspectiveTransform(it.points) }
     }
 
+    /**
+     * WARNING: REGRESSION SAFETY NET
+     * This corner detection pipeline has broken silently multiple times. 
+     * DO NOT MODIFY without running the QA_REGRESSION_PIPELINE.md checklist.
+     */
     fun detectCorners(bitmap: Bitmap, cacheDir: File? = null): Array<Point>? {
+        Log.d("CardScannerDocScan", "PIPELINE INVOCATION: detectCorners started")
         val originalMat = Mat()
         Utils.bitmapToMat(bitmap, originalMat)
         val candidates = findContourCandidates(originalMat, cacheDir)
@@ -258,21 +264,47 @@ object DocumentScanner {
             finalWidth = (finalHeight / 1.67).toInt()
         }
 
+        var targetWidth = finalWidth
+        var targetHeight = finalHeight
+        val maxDim = max(targetWidth, targetHeight)
+        var wasUpscaled = false
+
+        if (maxDim < 1920) {
+            wasUpscaled = true
+            val scale = 1920.0 / maxDim.toDouble()
+            targetWidth = (targetWidth * scale).toInt()
+            targetHeight = (targetHeight * scale).toInt()
+            Log.d(TAG, "Upscaling image from $finalWidth x $finalHeight to $targetWidth x $targetHeight to meet quality floor")
+        }
+
         val srcMat = MatOfPoint2f(*orderedPoints)
         val dstMat = MatOfPoint2f(
             Point(0.0, 0.0),
-            Point(finalWidth - 1.0, 0.0),
-            Point(finalWidth - 1.0, finalHeight - 1.0),
-            Point(0.0, finalHeight - 1.0)
+            Point(targetWidth - 1.0, 0.0),
+            Point(targetWidth - 1.0, targetHeight - 1.0),
+            Point(0.0, targetHeight - 1.0)
         )
 
         // Step 5 - Compute and Apply Transform
         val transformMatrix = Imgproc.getPerspectiveTransform(srcMat, dstMat)
         val warpedMat = Mat()
-        Imgproc.warpPerspective(originalMat, warpedMat, transformMatrix, Size(finalWidth.toDouble(), finalHeight.toDouble()))
+        Imgproc.warpPerspective(originalMat, warpedMat, transformMatrix, Size(targetWidth.toDouble(), targetHeight.toDouble()), Imgproc.INTER_CUBIC)
 
-        val croppedBitmap = Bitmap.createBitmap(finalWidth, finalHeight, Bitmap.Config.ARGB_8888)
-        Utils.matToBitmap(warpedMat, croppedBitmap)
+        var finalBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+        
+        if (wasUpscaled) {
+            // Apply mild sharpening after upscaling
+            val blur = Mat()
+            Imgproc.GaussianBlur(warpedMat, blur, Size(0.0, 0.0), 1.5)
+            val sharpenedMat = Mat()
+            org.opencv.core.Core.addWeighted(warpedMat, 1.3, blur, -0.3, 0.0, sharpenedMat)
+            blur.release()
+            
+            Utils.matToBitmap(sharpenedMat, finalBitmap)
+            sharpenedMat.release()
+        } else {
+            Utils.matToBitmap(warpedMat, finalBitmap)
+        }
 
         originalMat.release()
         warpedMat.release()
@@ -280,7 +312,7 @@ object DocumentScanner {
         dstMat.release()
         transformMatrix.release()
 
-        return croppedBitmap
+        return finalBitmap
     }
 
     private fun orderPointsForPerspectiveTransform(pts: Array<Point>): Array<Point> {

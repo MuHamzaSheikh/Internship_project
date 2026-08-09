@@ -19,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.businesscardscanner.databinding.FragmentCaptureDoneBinding
 import com.example.businesscardscanner.ocr.DocumentScanner
+import com.example.businesscardscanner.ocr.ImagePreprocessor
 import com.example.businesscardscanner.viewmodel.CaptureMode
 import com.example.businesscardscanner.viewmodel.CaptureSide
 import com.example.businesscardscanner.viewmodel.CardFlowViewModel
@@ -44,7 +45,7 @@ class CaptureDoneFragment : Fragment() {
     private val history = mutableListOf<List<PointF>>()
     private var historyIndex = -1
     
-    private var selectedFilter = "Original"
+    private var selectedFilter = "Auto"
 
     interface FlowHost {
         fun onCaptureDoneNext()
@@ -109,9 +110,13 @@ class CaptureDoneFragment : Fragment() {
         binding.filterChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
             selectedFilter = when (checkedIds.first()) {
+                R.id.chipAuto -> "Auto"
                 R.id.chipSharpen -> "Sharpen"
                 R.id.chipBW -> "BW"
                 R.id.chipHighContrast -> "Contrast"
+                R.id.chipBWScan -> "BW_Scan"
+                R.id.chipShadowRemove -> "Shadow_Remove"
+                R.id.chipMagicColor -> "Magic_Color"
                 else -> "Original"
             }
             updatePreviewWithFilter()
@@ -133,6 +138,10 @@ class CaptureDoneFragment : Fragment() {
     }
 
     private fun applyFilterToBitmap(original: Bitmap, filterType: String): Bitmap {
+        if (filterType == "Auto") {
+            return ImagePreprocessor.applyAdaptiveEnhancement(original)
+        }
+
         val mat = org.opencv.core.Mat()
         org.opencv.android.Utils.bitmapToMat(original, mat)
         val resultMat = org.opencv.core.Mat()
@@ -147,6 +156,57 @@ class CaptureDoneFragment : Fragment() {
             "BW" -> {
                 org.opencv.imgproc.Imgproc.cvtColor(mat, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY)
                 org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
+            }
+            "BW_Scan" -> {
+                val gray = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, gray, org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY)
+                org.opencv.imgproc.Imgproc.GaussianBlur(gray, gray, org.opencv.core.Size(5.0, 5.0), 0.0)
+                org.opencv.imgproc.Imgproc.adaptiveThreshold(
+                    gray, resultMat, 255.0,
+                    org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    org.opencv.imgproc.Imgproc.THRESH_BINARY, 21, 10.0
+                )
+                org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
+                gray.release()
+            }
+            "Shadow_Remove" -> {
+                val rgb = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, rgb, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
+                val bg = org.opencv.core.Mat()
+                val kernel = org.opencv.imgproc.Imgproc.getStructuringElement(org.opencv.imgproc.Imgproc.MORPH_ELLIPSE, org.opencv.core.Size(21.0, 21.0))
+                org.opencv.imgproc.Imgproc.dilate(rgb, bg, kernel)
+                org.opencv.imgproc.Imgproc.GaussianBlur(bg, bg, org.opencv.core.Size(21.0, 21.0), 0.0)
+                val diff = org.opencv.core.Mat()
+                org.opencv.core.Core.divide(rgb, bg, diff, 255.0)
+                org.opencv.imgproc.Imgproc.cvtColor(diff, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                rgb.release()
+                bg.release()
+                kernel.release()
+                diff.release()
+            }
+            "Magic_Color" -> {
+                val hsv = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, hsv, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
+                org.opencv.imgproc.Imgproc.cvtColor(hsv, hsv, org.opencv.imgproc.Imgproc.COLOR_RGB2HSV)
+                val channels = java.util.ArrayList<org.opencv.core.Mat>()
+                org.opencv.core.Core.split(hsv, channels)
+                val sChannel = channels[1]
+                val vChannel = channels[2]
+                val sMask = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.threshold(sChannel, sMask, 80.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY_INV)
+                val vMask = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.threshold(vChannel, vMask, 180.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY)
+                val bgMask = org.opencv.core.Mat()
+                org.opencv.core.Core.bitwise_and(sMask, vMask, bgMask)
+                vChannel.setTo(org.opencv.core.Scalar(255.0), bgMask)
+                org.opencv.core.Core.merge(channels, hsv)
+                org.opencv.imgproc.Imgproc.cvtColor(hsv, resultMat, org.opencv.imgproc.Imgproc.COLOR_HSV2RGB)
+                org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                hsv.release()
+                channels.forEach { it.release() }
+                sMask.release()
+                vMask.release()
+                bgMask.release()
             }
             "Contrast" -> {
                 mat.convertTo(resultMat, -1, 1.5, 20.0)

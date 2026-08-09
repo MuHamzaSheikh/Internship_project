@@ -192,6 +192,22 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
+            android:id="@+id/btnExportPdf"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            style="?attr/materialButtonOutlinedStyle"
+            android:text="Export as PDF"
+            android:textAllCaps="false"
+            android:textColor="@color/PrimaryBlue"
+            app:strokeColor="@color/PrimaryBlue"
+            app:layout_constraintTop_toBottomOf="@id/btnSaveToContacts"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <Button
             android:id="@+id/btnSaveCard"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -203,7 +219,7 @@
             android:text="Save Card"
             android:textAllCaps="false"
             android:textColor="@color/TextPrimary"
-            app:layout_constraintTop_toBottomOf="@id/btnSaveToContacts"
+            app:layout_constraintTop_toBottomOf="@id/btnExportPdf"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

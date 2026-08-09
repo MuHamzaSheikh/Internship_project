@@ -265,6 +265,70 @@ class CardEditFragment : Fragment() {
             }
             try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No contacts app found", android.widget.Toast.LENGTH_SHORT).show() }
         }
+
+        binding.btnExportPdf.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                exportPdf()
+            }
+        }
+    }
+
+    private suspend fun exportPdf() {
+        val frontUri = currentImages.getOrNull(0) ?: flowViewModel.state.value.frontImageUri ?: flowViewModel.state.value.imageUri
+        val backUri = currentImages.getOrNull(1) ?: flowViewModel.state.value.backImageUri
+        if (frontUri == null) {
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                android.widget.Toast.makeText(requireContext(), "No image to export", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+        try {
+            val pdfDocument = android.graphics.pdf.PdfDocument()
+            val resolver = requireContext().contentResolver
+
+            // Page 1: Front
+            val frontBitmap = resolver.openInputStream(frontUri)?.use { android.graphics.BitmapFactory.decodeStream(it) }
+            if (frontBitmap != null) {
+                val pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(frontBitmap.width, frontBitmap.height, 1).create()
+                val page = pdfDocument.startPage(pageInfo)
+                page.canvas.drawBitmap(frontBitmap, 0f, 0f, null)
+                pdfDocument.finishPage(page)
+            }
+
+            // Page 2: Back
+            if (backUri != null) {
+                val backBitmap = resolver.openInputStream(backUri)?.use { android.graphics.BitmapFactory.decodeStream(it) }
+                if (backBitmap != null) {
+                    val pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(backBitmap.width, backBitmap.height, 2).create()
+                    val page = pdfDocument.startPage(pageInfo)
+                    page.canvas.drawBitmap(backBitmap, 0f, 0f, null)
+                    pdfDocument.finishPage(page)
+                }
+            }
+
+            val pdfFile = java.io.File(requireContext().cacheDir, "BusinessCard_${System.currentTimeMillis()}.pdf")
+            java.io.FileOutputStream(pdfFile).use { out ->
+                pdfDocument.writeTo(out)
+            }
+            pdfDocument.close()
+
+            val pdfUri = androidx.core.content.FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", pdfFile)
+
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "application/pdf"
+                    putExtra(android.content.Intent.EXTRA_STREAM, pdfUri)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(android.content.Intent.createChooser(shareIntent, "Save or Share PDF"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("CardEditFragment", "PDF export failed", e)
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                android.widget.Toast.makeText(requireContext(), "Failed to export PDF", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun bindFromState(

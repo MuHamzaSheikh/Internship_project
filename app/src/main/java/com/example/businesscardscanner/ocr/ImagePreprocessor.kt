@@ -164,7 +164,13 @@ object ImagePreprocessor {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
+    /**
+     * WARNING: REGRESSION SAFETY NET
+     * This enhancement pipeline has broken silently multiple times. 
+     * DO NOT MODIFY without running the QA_REGRESSION_PIPELINE.md checklist.
+     */
     fun applyAdaptiveEnhancement(bitmap: Bitmap): Bitmap {
+        Log.d("CardScannerEnhance", "PIPELINE INVOCATION: applyAdaptiveEnhancement started")
         val mat = org.opencv.core.Mat()
         org.opencv.android.Utils.bitmapToMat(bitmap, mat)
 
@@ -245,6 +251,32 @@ object ImagePreprocessor {
             lookUpTable.release()
         } else {
             Log.d("CardScannerEnhance", "Brightness is acceptable, skipping correction")
+        }
+
+        // Step 6 - Dullness / Low-Contrast Detection
+        val stddevDull = org.opencv.core.MatOfDouble()
+        val meanDull = org.opencv.core.MatOfDouble()
+        org.opencv.core.Core.meanStdDev(grayMat, meanDull, stddevDull)
+        val contrast = stddevDull.get(0, 0)[0]
+        Log.d("CardScannerEnhance", "Contrast (StdDev) = $contrast")
+
+        if (contrast < 40.0) {
+            Log.d("CardScannerEnhance", "Image is dull/low-contrast. Applying histogram stretch and CLAHE.")
+            val claheDull = org.opencv.imgproc.Imgproc.createCLAHE(4.0, org.opencv.core.Size(8.0, 8.0))
+            val hsvDull = org.opencv.core.Mat()
+            org.opencv.imgproc.Imgproc.cvtColor(currentMat, hsvDull, org.opencv.imgproc.Imgproc.COLOR_RGB2HSV)
+            val channelsDull = java.util.ArrayList<org.opencv.core.Mat>()
+            org.opencv.core.Core.split(hsvDull, channelsDull)
+            
+            // Normalize V channel to full 0-255 range (stretch)
+            org.opencv.core.Core.normalize(channelsDull[2], channelsDull[2], 0.0, 255.0, org.opencv.core.Core.NORM_MINMAX)
+            // Apply aggressive CLAHE
+            claheDull.apply(channelsDull[2], channelsDull[2])
+            
+            org.opencv.core.Core.merge(channelsDull, hsvDull)
+            org.opencv.imgproc.Imgproc.cvtColor(hsvDull, currentMat, org.opencv.imgproc.Imgproc.COLOR_HSV2RGB)
+            hsvDull.release()
+            channelsDull.forEach { it.release() }
         }
 
         // Ensure alpha channel is added back if needed by converting to RGBA
@@ -387,6 +419,76 @@ object ImagePreprocessor {
             "BW" -> {
                 org.opencv.imgproc.Imgproc.cvtColor(mat, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY)
                 org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
+            }
+            "BW_Scan" -> {
+                val gray = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, gray, org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY)
+                // Mild blur to reduce noise before thresholding
+                org.opencv.imgproc.Imgproc.GaussianBlur(gray, gray, org.opencv.core.Size(5.0, 5.0), 0.0)
+                org.opencv.imgproc.Imgproc.adaptiveThreshold(
+                    gray, resultMat, 255.0,
+                    org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    org.opencv.imgproc.Imgproc.THRESH_BINARY, 21, 10.0
+                )
+                org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
+                gray.release()
+            }
+            "Shadow_Remove" -> {
+                val rgb = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, rgb, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
+                
+                val bg = org.opencv.core.Mat()
+                // Dilation estimates the background by expanding the bright areas over text
+                val kernel = org.opencv.imgproc.Imgproc.getStructuringElement(org.opencv.imgproc.Imgproc.MORPH_ELLIPSE, org.opencv.core.Size(21.0, 21.0))
+                org.opencv.imgproc.Imgproc.dilate(rgb, bg, kernel)
+                org.opencv.imgproc.Imgproc.GaussianBlur(bg, bg, org.opencv.core.Size(21.0, 21.0), 0.0)
+                
+                // subtract/divide approach: dst = 255 - (255 - src) * 255 / (255 - bg) roughly, or just src/bg * 255
+                // A simpler normalized division:
+                val diff = org.opencv.core.Mat()
+                org.opencv.core.Core.divide(rgb, bg, diff, 255.0) // diff = (rgb / bg) * 255
+                
+                org.opencv.imgproc.Imgproc.cvtColor(diff, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                
+                rgb.release()
+                bg.release()
+                kernel.release()
+                diff.release()
+            }
+            "Magic_Color" -> {
+                // Convert to HSV, boost Value of near-white background to 255, preserve color
+                val hsv = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.cvtColor(mat, hsv, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
+                org.opencv.imgproc.Imgproc.cvtColor(hsv, hsv, org.opencv.imgproc.Imgproc.COLOR_RGB2HSV)
+                
+                val channels = java.util.ArrayList<org.opencv.core.Mat>()
+                org.opencv.core.Core.split(hsv, channels)
+                
+                // Create a mask for near-white/light-gray (low saturation, high value)
+                val sChannel = channels[1]
+                val vChannel = channels[2]
+                
+                val sMask = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.threshold(sChannel, sMask, 80.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY_INV)
+                
+                val vMask = org.opencv.core.Mat()
+                org.opencv.imgproc.Imgproc.threshold(vChannel, vMask, 180.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY)
+                
+                val bgMask = org.opencv.core.Mat()
+                org.opencv.core.Core.bitwise_and(sMask, vMask, bgMask)
+                
+                // Boost Value channel in background areas to 255
+                vChannel.setTo(org.opencv.core.Scalar(255.0), bgMask)
+                
+                org.opencv.core.Core.merge(channels, hsv)
+                org.opencv.imgproc.Imgproc.cvtColor(hsv, resultMat, org.opencv.imgproc.Imgproc.COLOR_HSV2RGB)
+                org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                
+                hsv.release()
+                channels.forEach { it.release() }
+                sMask.release()
+                vMask.release()
+                bgMask.release()
             }
             "Contrast" -> {
                 mat.convertTo(resultMat, -1, 1.5, 20.0)
