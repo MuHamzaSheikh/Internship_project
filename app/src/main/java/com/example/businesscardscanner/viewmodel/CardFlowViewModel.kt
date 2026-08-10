@@ -92,42 +92,62 @@ class CardFlowViewModel : ViewModel() {
         if (front == null) return back
         if (back == null) return front
 
-        fun pick(frontField: com.example.businesscardscanner.ocr.OcrField, backField: com.example.businesscardscanner.ocr.OcrField): com.example.businesscardscanner.ocr.OcrField {
+        val rejectedBackFields = mutableListOf<String>()
+
+        fun pick(
+            frontField: com.example.businesscardscanner.ocr.OcrField,
+            backField: com.example.businesscardscanner.ocr.OcrField,
+            trackReject: Boolean = false
+        ): com.example.businesscardscanner.ocr.OcrField {
             return when {
-                frontField.value.isNotBlank() -> frontField
+                frontField.value.isNotBlank() -> {
+                    if (trackReject && backField.value.isNotBlank() && backField.value.lowercase() != frontField.value.lowercase()) {
+                        rejectedBackFields.add(backField.value)
+                    }
+                    frontField
+                }
                 backField.value.isNotBlank() -> backField
                 frontField.confidence >= backField.confidence -> frontField
                 else -> backField
             }
         }
         
-        val allStructuredValues = listOf(
-            pick(front.name, back.name).value,
-            pick(front.company, back.company).value,
-            pick(front.jobTitle, back.jobTitle).value,
-            pick(front.phone, back.phone).value,
-            pick(front.phoneSecondary, back.phoneSecondary).value,
-            pick(front.email, back.email).value,
-            pick(front.website, back.website).value,
-            pick(front.address, back.address).value
-        ).filter { it.isNotBlank() }.map { it.lowercase() }
+        val mergedName = pick(front.name, back.name, trackReject = true)
+        val mergedCompany = pick(front.company, back.company, trackReject = true)
+        val mergedJobTitle = pick(front.jobTitle, back.jobTitle, trackReject = true)
+        // We don't track rejects for regex-based fields (phone, email) as per user request to keep description clean of them
+        val mergedPhone = pick(front.phone, back.phone)
+        val mergedPhoneSecondary = pick(front.phoneSecondary, back.phoneSecondary)
+        val mergedEmail = pick(front.email, back.email)
+        val mergedWebsite = pick(front.website, back.website)
+        val mergedAddress = pick(front.address, back.address, trackReject = true)
+        val mergedCategory = pick(front.category, back.category)
+        val mergedSocial = pick(front.social, back.social)
 
-        val combinedDescription = listOfNotNull(front.description.value, back.description.value)
+        val allDescriptions = mutableListOf<String>()
+        if (front.description.value.isNotBlank()) allDescriptions.add(front.description.value)
+        if (back.description.value.isNotBlank()) allDescriptions.add(back.description.value)
+        
+        if (rejectedBackFields.isNotEmpty()) {
+            allDescriptions.add(rejectedBackFields.joinToString("\n"))
+        }
+
+        val combinedDescription = allDescriptions
             .filter { it.isNotBlank() }
             .joinToString("\n\n")
             .trim()
 
         return front.copy(
-            name = pick(front.name, back.name),
-            company = pick(front.company, back.company),
-            jobTitle = pick(front.jobTitle, back.jobTitle),
-            phone = pick(front.phone, back.phone),
-            phoneSecondary = pick(front.phoneSecondary, back.phoneSecondary),
-            email = pick(front.email, back.email),
-            website = pick(front.website, back.website),
-            address = pick(front.address, back.address),
-            category = pick(front.category, back.category),
-            social = pick(front.social, back.social),
+            name = mergedName,
+            company = mergedCompany,
+            jobTitle = mergedJobTitle,
+            phone = mergedPhone,
+            phoneSecondary = mergedPhoneSecondary,
+            email = mergedEmail,
+            website = mergedWebsite,
+            address = mergedAddress,
+            category = mergedCategory,
+            social = mergedSocial,
             description = com.example.businesscardscanner.ocr.OcrField(combinedDescription, 80),
             rawText = listOf(front.rawText, back.rawText).filter { it.isNotBlank() }.joinToString("\n")
         )
