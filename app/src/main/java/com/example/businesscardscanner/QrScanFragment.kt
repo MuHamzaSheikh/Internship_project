@@ -127,6 +127,7 @@ class QrScanFragment : Fragment() {
             flowViewModel.setCaptureMode(CaptureMode.CARD)
             (activity as? FlowHost)?.onScanCardRequested()
         }
+        binding.header.toolbarTitle.text = "Scanning QR code"
         binding.header.toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
