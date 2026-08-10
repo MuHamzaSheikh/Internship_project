@@ -46,6 +46,10 @@ class CaptureDoneFragment : Fragment() {
     private var historyIndex = -1
     
     private var selectedFilter = "Auto"
+    
+    enum class UIState { CROP, FILTER }
+    private var uiState = UIState.CROP
+    private var croppedBitmap: Bitmap? = null
 
     interface FlowHost {
         fun onCaptureDoneNext()
@@ -82,14 +86,33 @@ class CaptureDoneFragment : Fragment() {
         binding.btnRedo.setOnClickListener { redo() }
 
         // Bottom Actions
-        binding.root.findViewById<View>(R.id.btnLeftAction)?.setOnClickListener {
-            // Before & After Preview (Toggle original/cropped view or just show raw)
-            Toast.makeText(requireContext(), "Compare preview", Toast.LENGTH_SHORT).show()
+        binding.root.findViewById<View>(R.id.btnLeftAction)?.setOnTouchListener { _, event ->
+            if (uiState == UIState.FILTER) {
+                when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        // Hold to Compare: Show unfiltered cropped image
+                        croppedBitmap?.let { binding.imgRawPreview.setImageBitmap(it) }
+                        true
+                    }
+                    android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                        // Release: Re-apply filter
+                        updatePreviewWithFilter()
+                        true
+                    }
+                    else -> false
+                }
+            } else {
+                false
+            }
         }
 
         binding.root.findViewById<View>(R.id.btnDone)?.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                cropAndProceed()
+                if (uiState == UIState.CROP) {
+                    cropToFilterState()
+                } else {
+                    saveFilteredImage()
+                }
             }
         }
 
@@ -124,7 +147,7 @@ class CaptureDoneFragment : Fragment() {
     }
 
     private fun updatePreviewWithFilter() {
-        val bitmap = rawBitmap ?: return
+        val bitmap = croppedBitmap ?: return
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
             val previewBitmap = if (selectedFilter == "Original") {
                 bitmap
@@ -250,7 +273,13 @@ class CaptureDoneFragment : Fragment() {
             rawBitmap = bitmap
             detectedCorners = DocumentScanner.detectCorners(bitmap)
 
+            if (detectedCorners != null && detectedCorners!!.size == 4) {
+                cropToFilterState(detectedCorners)
+                return
+            }
+
             withContext(Dispatchers.Main) {
+                transitionToCropState()
                 if (isAdded) {
                     binding.imgRawPreview.setImageBitmap(bitmap)
                     binding.imgRawPreview.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -347,23 +376,60 @@ class CaptureDoneFragment : Fragment() {
         binding.btnRedo.isEnabled = historyIndex < history.size - 1
     }
 
-    private suspend fun cropAndProceed() {
+    private fun transitionToCropState() {
+        uiState = UIState.CROP
+        binding.polygonView.visibility = View.VISIBLE
+        binding.btnUndo.visibility = View.VISIBLE
+        binding.btnRedo.visibility = View.VISIBLE
+        binding.filterScrollView.visibility = View.GONE
+        binding.root.findViewById<View>(R.id.btnLeftAction)?.visibility = View.GONE
+    }
+
+    private fun transitionToFilterState(cropped: Bitmap) {
+        uiState = UIState.FILTER
+        croppedBitmap = cropped
+        binding.polygonView.visibility = View.GONE
+        binding.btnUndo.visibility = View.GONE
+        binding.btnRedo.visibility = View.GONE
+        binding.filterScrollView.visibility = View.VISIBLE
+        binding.root.findViewById<View>(R.id.btnLeftAction)?.visibility = View.VISIBLE
+        
+        // Ensure standard Matrix for previewing the straight cropped image
+        binding.imgRawPreview.imageMatrix = Matrix()
+        binding.imgRawPreview.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+        
+        updatePreviewWithFilter()
+    }
+
+    private suspend fun cropToFilterState(autoCorners: Array<Point>? = null) {
         val bitmap = rawBitmap ?: return
-        val points = binding.polygonView.getPoints()
-        if (points.size != 4) return
 
         withContext(Dispatchers.Main) {
             binding.loadingOverlay.visibility = View.VISIBLE
         }
 
-        val inverseMatrix = Matrix()
-        imageMatrix.invert(inverseMatrix)
-
-        val bitmapCorners = Array(4) { Point() }
-        for (i in 0 until 4) {
-            val unmapped = FloatArray(2)
-            inverseMatrix.mapPoints(unmapped, floatArrayOf(points[i].x, points[i].y))
-            bitmapCorners[i] = Point(unmapped[0].toDouble().coerceIn(0.0, bitmap.width.toDouble()), unmapped[1].toDouble().coerceIn(0.0, bitmap.height.toDouble()))
+        val bitmapCorners = if (autoCorners != null && autoCorners.size == 4) {
+            autoCorners
+        } else {
+            val points = binding.polygonView.getPoints()
+            if (points.size != 4) {
+                withContext(Dispatchers.Main) {
+                    binding.loadingOverlay.visibility = View.GONE
+                }
+                return
+            }
+            val inverseMatrix = Matrix()
+            imageMatrix.invert(inverseMatrix)
+            val corners = Array(4) { Point() }
+            for (i in 0 until 4) {
+                val unmapped = FloatArray(2)
+                inverseMatrix.mapPoints(unmapped, floatArrayOf(points[i].x, points[i].y))
+                corners[i] = Point(
+                    unmapped[0].toDouble().coerceIn(0.0, bitmap.width.toDouble()),
+                    unmapped[1].toDouble().coerceIn(0.0, bitmap.height.toDouble())
+                )
+            }
+            corners
         }
 
         var cropped = try {
@@ -373,19 +439,34 @@ class CaptureDoneFragment : Fragment() {
             bitmap
         }
 
-        if (selectedFilter != "Original") {
-            cropped = applyFilterToBitmap(cropped, selectedFilter)
-        }
-
         if (cropped.height > cropped.width) {
             val matrix = Matrix().apply { postRotate(-90f) }
             cropped = Bitmap.createBitmap(cropped, 0, 0, cropped.width, cropped.height, matrix, true)
+        }
+        
+        withContext(Dispatchers.Main) {
+            binding.loadingOverlay.visibility = View.GONE
+            transitionToFilterState(cropped)
+        }
+    }
+
+    private suspend fun saveFilteredImage() {
+        val baseCropped = croppedBitmap ?: return
+        
+        withContext(Dispatchers.Main) {
+            binding.loadingOverlay.visibility = View.VISIBLE
+        }
+        
+        val finalBitmap = if (selectedFilter != "Original") {
+            applyFilterToBitmap(baseCropped, selectedFilter)
+        } else {
+            baseCropped
         }
 
         val file = File(requireContext().cacheDir, "cropped_card_${System.currentTimeMillis()}.jpg")
         try {
             FileOutputStream(file).use { out ->
-                cropped.compress(Bitmap.CompressFormat.JPEG, 95, out)
+                finalBitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
             }
             val croppedUri = Uri.fromFile(file)
             
