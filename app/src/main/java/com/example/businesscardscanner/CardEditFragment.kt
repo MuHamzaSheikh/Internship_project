@@ -89,6 +89,36 @@ class CardEditFragment : Fragment() {
             TabLayoutMediator(binding.pageDots, pager) { _, _ -> }.attach()
             updateDots(images.size, 0)
             previewContainer.post { applyPreviewAspect(images.firstOrNull()) }
+            
+            val isQrMode = images.isEmpty()
+            binding.cardPreviewContainer.visibility = if (isQrMode) View.GONE else View.VISIBLE
+            binding.pageDots.visibility = if (isQrMode) View.GONE else (if (images.size > 1) View.VISIBLE else View.GONE)
+            
+            // Hide action buttons in QR mode to match simplified mockup (REVERTED: keep them visible)
+            binding.btnActionCall.visibility = View.VISIBLE
+            binding.btnActionSms.visibility = View.VISIBLE
+            binding.btnActionCallSecondary.visibility = View.VISIBLE
+            binding.btnActionSmsSecondary.visibility = View.VISIBLE
+            binding.btnActionEmail.visibility = View.VISIBLE
+            binding.btnActionMap.visibility = View.VISIBLE
+            
+            // Hide secondary fields and extra buttons
+            val actionVisibility = if (isQrMode) View.GONE else View.VISIBLE
+            binding.tvPhoneSecondaryLabel.visibility = actionVisibility
+            binding.llPhoneSecondary.visibility = actionVisibility
+            binding.tvDescriptionLabel.visibility = actionVisibility
+            binding.etDescription.visibility = actionVisibility
+            binding.tvNotesLabel.visibility = actionVisibility
+            binding.etNotes.visibility = actionVisibility
+            binding.btnSaveToContacts.visibility = actionVisibility
+            binding.btnExportPdf.visibility = actionVisibility
+            
+            if (isQrMode) {
+                binding.btnSaveCard.setBackgroundResource(R.drawable.edit_text_outline)
+                binding.btnSaveCard.setTextColor(ContextCompat.getColor(requireContext(), R.color.TextPrimary))
+            } else {
+                binding.btnSaveCard.setBackgroundResource(R.drawable.btn_skip)
+            }
         }
 
         groupField.setOnClickListener { groupField.showDropDown() }
