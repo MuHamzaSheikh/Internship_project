@@ -453,10 +453,6 @@ class CaptureDoneFragment : Fragment() {
             bitmap
         }
 
-        if (cropped.height > cropped.width) {
-            val matrix = Matrix().apply { postRotate(-90f) }
-            cropped = Bitmap.createBitmap(cropped, 0, 0, cropped.width, cropped.height, matrix, true)
-        }
         
         withContext(Dispatchers.Main) {
             binding.loadingOverlay.visibility = View.GONE

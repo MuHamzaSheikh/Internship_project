@@ -254,7 +254,7 @@ object DocumentScanner {
         val originalMat = Mat()
         Utils.bitmapToMat(bitmap, originalMat)
         
-        val rawOrderedPoints = orderPointsForPerspectiveTransform(corners)
+        val rawOrderedPoints = corners
         
         // Inset corners slightly towards the center to shave off background/shadows
         val centerX = rawOrderedPoints.map { it.x }.average()

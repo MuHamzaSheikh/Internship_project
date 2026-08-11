@@ -182,7 +182,7 @@ class CaptureFragment : Fragment() {
 
             val capture = ImageCapture.Builder()
                 .setResolutionSelector(captureResolutionSelector)
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .build()
             this.imageCapture = capture
 
