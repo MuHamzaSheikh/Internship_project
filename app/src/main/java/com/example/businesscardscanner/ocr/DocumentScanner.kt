@@ -102,7 +102,7 @@ object DocumentScanner {
             
             val perimeter = Imgproc.arcLength(contour2f, true)
             val approx = MatOfPoint2f()
-            Imgproc.approxPolyDP(contour2f, approx, 0.02 * perimeter, true)
+            Imgproc.approxPolyDP(contour2f, approx, 0.015 * perimeter, true)
             
             val isStrict = approx.toArray().size == 4
             val pointsToUse = if (isStrict) {
@@ -236,7 +236,19 @@ object DocumentScanner {
         val originalMat = Mat()
         Utils.bitmapToMat(bitmap, originalMat)
         
-        val orderedPoints = orderPointsForPerspectiveTransform(corners)
+        val rawOrderedPoints = orderPointsForPerspectiveTransform(corners)
+        
+        // Inset corners slightly towards the center to shave off background/shadows
+        val centerX = rawOrderedPoints.map { it.x }.average()
+        val centerY = rawOrderedPoints.map { it.y }.average()
+        val insetRatio = 0.015 // Shave 1.5% inwards from all edges
+        
+        val orderedPoints = rawOrderedPoints.map { p ->
+            val dx = centerX - p.x
+            val dy = centerY - p.y
+            Point(p.x + dx * insetRatio, p.y + dy * insetRatio)
+        }.toTypedArray()
+        
         val tl = orderedPoints[0]
         val tr = orderedPoints[1]
         val br = orderedPoints[2]
