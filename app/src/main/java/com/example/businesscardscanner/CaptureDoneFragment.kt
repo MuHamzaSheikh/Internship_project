@@ -181,50 +181,69 @@ class CaptureDoneFragment : Fragment() {
                 org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
             }
             "BW_Scan" -> {
+                // True Adaptive-Threshold B&W Scan Mode
                 val gray = org.opencv.core.Mat()
                 org.opencv.imgproc.Imgproc.cvtColor(mat, gray, org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY)
+                // Mild blur to reduce noise
                 org.opencv.imgproc.Imgproc.GaussianBlur(gray, gray, org.opencv.core.Size(5.0, 5.0), 0.0)
+                // Adaptive threshold to binarize (crisp black text on white background)
                 org.opencv.imgproc.Imgproc.adaptiveThreshold(
                     gray, resultMat, 255.0,
                     org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-                    org.opencv.imgproc.Imgproc.THRESH_BINARY, 21, 10.0
+                    org.opencv.imgproc.Imgproc.THRESH_BINARY, 21, 15.0
                 )
                 org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_GRAY2RGBA)
                 gray.release()
             }
             "Shadow_Remove" -> {
+                // Morphological background estimation for uneven lighting
                 val rgb = org.opencv.core.Mat()
                 org.opencv.imgproc.Imgproc.cvtColor(mat, rgb, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
                 val bg = org.opencv.core.Mat()
-                val kernel = org.opencv.imgproc.Imgproc.getStructuringElement(org.opencv.imgproc.Imgproc.MORPH_ELLIPSE, org.opencv.core.Size(21.0, 21.0))
+                
+                // Use a large dilation kernel to estimate the lighting/shadow gradient
+                val kernel = org.opencv.imgproc.Imgproc.getStructuringElement(org.opencv.imgproc.Imgproc.MORPH_RECT, org.opencv.core.Size(51.0, 51.0))
                 org.opencv.imgproc.Imgproc.dilate(rgb, bg, kernel)
-                org.opencv.imgproc.Imgproc.GaussianBlur(bg, bg, org.opencv.core.Size(21.0, 21.0), 0.0)
+                org.opencv.imgproc.Imgproc.GaussianBlur(bg, bg, org.opencv.core.Size(51.0, 51.0), 0.0)
+                
+                // Subtract/divide background from original to normalize illumination
                 val diff = org.opencv.core.Mat()
-                org.opencv.core.Core.divide(rgb, bg, diff, 255.0)
+                org.opencv.core.Core.divide(rgb, bg, diff, 255.0) // division normalizes illumination
                 org.opencv.imgproc.Imgproc.cvtColor(diff, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                
                 rgb.release()
                 bg.release()
                 kernel.release()
                 diff.release()
             }
             "Magic_Color" -> {
+                // Brightens background toward white while preserving text/logo colors
                 val hsv = org.opencv.core.Mat()
                 org.opencv.imgproc.Imgproc.cvtColor(mat, hsv, org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB)
                 org.opencv.imgproc.Imgproc.cvtColor(hsv, hsv, org.opencv.imgproc.Imgproc.COLOR_RGB2HSV)
+                
                 val channels = java.util.ArrayList<org.opencv.core.Mat>()
                 org.opencv.core.Core.split(hsv, channels)
+                
                 val sChannel = channels[1]
                 val vChannel = channels[2]
+                
+                // Identify regions with low saturation (near white/gray) and high enough value
                 val sMask = org.opencv.core.Mat()
-                org.opencv.imgproc.Imgproc.threshold(sChannel, sMask, 80.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY_INV)
+                org.opencv.imgproc.Imgproc.threshold(sChannel, sMask, 60.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY_INV)
                 val vMask = org.opencv.core.Mat()
-                org.opencv.imgproc.Imgproc.threshold(vChannel, vMask, 180.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY)
+                org.opencv.imgproc.Imgproc.threshold(vChannel, vMask, 150.0, 255.0, org.opencv.imgproc.Imgproc.THRESH_BINARY)
+                
                 val bgMask = org.opencv.core.Mat()
                 org.opencv.core.Core.bitwise_and(sMask, vMask, bgMask)
+                
+                // Boost the Value channel to pure white in these background regions
                 vChannel.setTo(org.opencv.core.Scalar(255.0), bgMask)
+                
                 org.opencv.core.Core.merge(channels, hsv)
                 org.opencv.imgproc.Imgproc.cvtColor(hsv, resultMat, org.opencv.imgproc.Imgproc.COLOR_HSV2RGB)
                 org.opencv.imgproc.Imgproc.cvtColor(resultMat, resultMat, org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA)
+                
                 hsv.release()
                 channels.forEach { it.release() }
                 sMask.release()
@@ -273,13 +292,8 @@ class CaptureDoneFragment : Fragment() {
             rawBitmap = bitmap
             detectedCorners = DocumentScanner.detectCorners(bitmap)
 
-            if (detectedCorners != null && detectedCorners!!.size == 4) {
-                cropToFilterState(detectedCorners)
-                return
-            }
-
             withContext(Dispatchers.Main) {
-                transitionToCropState()
+                transitionToCropState() // ALWAYS show crop state first
                 if (isAdded) {
                     binding.imgRawPreview.setImageBitmap(bitmap)
                     binding.imgRawPreview.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {

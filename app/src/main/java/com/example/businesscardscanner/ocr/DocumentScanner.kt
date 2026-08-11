@@ -91,6 +91,14 @@ object DocumentScanner {
         
         val candidates = mutableListOf<ContourCandidate>()
 
+        // Calculate overall image mean for contrast comparison
+        val imageMeanObj = org.opencv.core.MatOfDouble()
+        val imageStdObj = org.opencv.core.MatOfDouble()
+        org.opencv.core.Core.meanStdDev(grayMat, imageMeanObj, imageStdObj)
+        val imageMean = imageMeanObj.get(0,0)[0]
+        imageMeanObj.release()
+        imageStdObj.release()
+
         for ((index, contour) in contours.withIndex()) {
             val contour2f = MatOfPoint2f(*contour.toArray())
             val area = Imgproc.contourArea(contour)
@@ -158,6 +166,15 @@ object DocumentScanner {
                 continue
             }
             
+            // Contrast Distinctiveness: Cards typically have higher contrast against the background
+            val boundRect = Imgproc.boundingRect(contour)
+            val roi = grayMat.submat(boundRect)
+            val roiMeanObj = org.opencv.core.Core.mean(roi)
+            val roiMean = roiMeanObj.`val`[0]
+            val diff = kotlin.math.abs(roiMean - imageMean)
+            val contrastScore = (diff / 128.0).coerceIn(0.0, 1.0)
+            roi.release()
+            
             // Scoring
             val targetRatio = 1.67
             val ratioDeviation = kotlin.math.abs(aspectRatio - targetRatio)
@@ -172,7 +189,8 @@ object DocumentScanner {
                 sizeScore = 0.0
             }
             
-            var score = (aspectRatioScore * 0.3) + (rectScore * 0.3) + (solidity * 0.3) + (sizeScore * 0.1)
+            // Rebalanced weights to include contrast score
+            var score = (aspectRatioScore * 0.25) + (rectScore * 0.25) + (solidity * 0.25) + (sizeScore * 0.15) + (contrastScore * 0.10)
             if (isStrict) {
                 score += 0.1 // 10% bonus for being a true 4-point polygon
             }
@@ -180,7 +198,7 @@ object DocumentScanner {
             val candidate = ContourCandidate(pointsToUse, area, aspectRatio, rectangularity, solidity, score, isStrict)
             candidates.add(candidate)
             
-            Log.d(TAG, "Candidate $index: isStrict=$isStrict, areaRatio=${String.format("%.2f", sizeRatio)}, aspectRatio=${String.format("%.2f", aspectRatio)}, rect=${String.format("%.2f", rectangularity)} => score=${String.format("%.3f", score)}")
+            Log.d(TAG, "Candidate $index: isStrict=$isStrict, areaRatio=${String.format("%.2f", sizeRatio)}, aspectRatio=${String.format("%.2f", aspectRatio)}, rect=${String.format("%.2f", rectangularity)}, contrast=${String.format("%.2f", contrastScore)} => score=${String.format("%.3f", score)}")
         }
 
         // Return candidates sorted by score
