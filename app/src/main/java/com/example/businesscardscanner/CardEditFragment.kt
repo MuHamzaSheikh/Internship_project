@@ -35,6 +35,7 @@ class CardEditFragment : Fragment() {
 
     interface FlowHost {
         fun onFinishFlow()
+        fun onRetakeRequested(isBackSide: Boolean)
     }
 
     private var _binding: com.example.businesscardscanner.databinding.FragmentCardEditBinding? = null
@@ -222,6 +223,11 @@ class CardEditFragment : Fragment() {
 
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+        
+        binding.btnRetake.setOnClickListener {
+            val isBackSide = pager.currentItem == 1
+            (activity as? FlowHost)?.onRetakeRequested(isBackSide)
         }
     }
     

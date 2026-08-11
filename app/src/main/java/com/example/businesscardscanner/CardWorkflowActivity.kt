@@ -169,6 +169,13 @@ class CardWorkflowActivity : AppCompatActivity(),
         finish()
     }
 
+    override fun onRetakeRequested(isBackSide: Boolean) {
+        flowViewModel.setCaptureMode(CaptureMode.CARD)
+        val side = if (isBackSide) com.example.businesscardscanner.viewmodel.CaptureSide.BACK else com.example.businesscardscanner.viewmodel.CaptureSide.FRONT
+        flowViewModel.setCaptureSide(side)
+        showStep(CaptureFragment.newInstance(captureSide = side))
+    }
+
     // ==========================
     // Navigation Helpers
     // ==========================

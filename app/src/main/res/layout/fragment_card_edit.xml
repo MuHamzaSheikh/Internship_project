@@ -65,6 +65,26 @@
                 android:layout_height="match_parent" />
 
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnRetake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_camera_icon"
+            app:backgroundTint="@color/PrimaryBlue"
+            app:tint="@android:color/white"
+            app:fabCustomSize="48dp"
+            app:maxImageSize="24dp"
+            app:elevation="4dp"
+            android:contentDescription="Retake Image"
+            app:layout_constraintCircle="@id/cardPreviewContainer"
+            app:layout_constraintCircleAngle="135"
+            app:layout_constraintCircleRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/cardPreviewContainer"
+            app:layout_constraintEnd_toEndOf="@id/cardPreviewContainer"
+            android:layout_marginEnd="-8dp"
+            android:layout_marginBottom="-8dp" />
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/pageDots"
             android:layout_width="wrap_content"
