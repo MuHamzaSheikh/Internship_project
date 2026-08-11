@@ -77,7 +77,7 @@ class CardWorkflowActivity : AppCompatActivity(),
     }
 
     override fun onQrScanDone() {
-        showStep(AfterQrScanFragment.newInstance())
+        showStep(CardEditFragment.newInstance(intent.getStringExtra(EXTRA_CARD_ID)))
     }
 
     override fun onScanCardRequested() {

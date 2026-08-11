@@ -48,31 +48,80 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="18dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="18dp"
         app:layout_constraintTop_toBottomOf="@id/btnRefresh"
         app:layout_constraintBottom_toTopOf="@id/bottomActions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <!-- The actual preview view gets injected dynamically here via QrScanFragment -->
-
-        <ImageView
-            android:id="@+id/overlayBrackets"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:importantForAccessibility="no"
-            android:scaleType="fitCenter"
-            android:src="@drawable/capture_corner_brackets" />
-
-        <!-- Animated Scanning Beam -->
-        <View
-            android:id="@+id/scanBeam"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_gravity="top"
-            android:background="@drawable/scan_beam_gradient"
-            android:visibility="visible" />
     </FrameLayout>
+
+    <!-- The target bounds -->
+    <ImageView
+        android:id="@+id/overlayBrackets"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="@id/qrPreviewContainer"
+        app:layout_constraintBottom_toBottomOf="@id/qrPreviewContainer"
+        app:layout_constraintStart_toStartOf="@id/qrPreviewContainer"
+        app:layout_constraintEnd_toEndOf="@id/qrPreviewContainer"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no"
+        android:src="@drawable/capture_qr_brackets" />
+
+    <!-- Animated Scanning Beam -->
+    <View
+        android:id="@+id/scanBeam"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:background="@drawable/scan_beam_gradient"
+        app:layout_constraintTop_toTopOf="@id/overlayBrackets"
+        app:layout_constraintStart_toStartOf="@id/overlayBrackets"
+        app:layout_constraintEnd_toEndOf="@id/overlayBrackets"
+        android:visibility="visible" />
+
+    <!-- Top scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/qrPreviewContainer"
+        app:layout_constraintBottom_toTopOf="@id/overlayBrackets"
+        app:layout_constraintStart_toStartOf="@id/qrPreviewContainer"
+        app:layout_constraintEnd_toEndOf="@id/qrPreviewContainer" />
+
+    <!-- Bottom scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/qrPreviewContainer"
+        app:layout_constraintStart_toStartOf="@id/qrPreviewContainer"
+        app:layout_constraintEnd_toEndOf="@id/qrPreviewContainer" />
+
+    <!-- Left scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintStart_toStartOf="@id/qrPreviewContainer"
+        app:layout_constraintEnd_toStartOf="@id/overlayBrackets" />
+
+    <!-- Right scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintStart_toEndOf="@id/overlayBrackets"
+        app:layout_constraintEnd_toEndOf="@id/qrPreviewContainer" />
 
     <FrameLayout
         android:id="@+id/bottomActions"

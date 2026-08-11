@@ -94,13 +94,6 @@ class QrScanFragment : Fragment() {
         val previewView = PreviewView(requireContext()).apply {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         }
-        val overlay = ImageView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            setImageResource(R.drawable.capture_corner_brackets)
-            scaleType = ImageView.ScaleType.FIT_XY
-            contentDescription = null
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }
         previewView.previewStreamState.observe(viewLifecycleOwner) { state ->
             Log.d(TAG, "Preview stream state=$state")
             if (!surfaceStreamingLogged && state == PreviewView.StreamState.STREAMING) {
@@ -108,9 +101,7 @@ class QrScanFragment : Fragment() {
                 Log.d(TAG, "PreviewView is streaming frames")
             }
         }
-        previewContainer.removeAllViews()
-        previewContainer.addView(previewView)
-        previewContainer.addView(overlay)
+        previewContainer.addView(previewView, 0)
 
         binding.root.findViewById<View>(R.id.btnLeftAction)?.setOnClickListener {
             flowViewModel.setCaptureMode(CaptureMode.QR)
@@ -145,8 +136,9 @@ class QrScanFragment : Fragment() {
 
         // Animated Scanning Beam
         val scanBeam = binding.root.findViewById<View>(R.id.scanBeam)
+        val overlayBrackets = binding.root.findViewById<View>(R.id.overlayBrackets)
         scanBeam?.post {
-            val parentHeight = previewContainer.height.toFloat()
+            val parentHeight = overlayBrackets?.height?.toFloat() ?: previewContainer.height.toFloat()
             val beamHeight = scanBeam.height.toFloat()
             scanBeamAnimator = ObjectAnimator.ofFloat(scanBeam, "translationY", 0f, parentHeight - beamHeight).apply {
                 duration = 2000
@@ -208,14 +200,19 @@ class QrScanFragment : Fragment() {
                             Log.d(TAG, "Analyzer frame #$frameNo barcodeResult=${barcode ?: "<null>"} count=${barcodes.size}")
                             if (!barcode.isNullOrBlank() && !scanned) {
                                 scanned = true
+                                flowViewModel.setProcessing(true)
                                 flowViewModel.setQrResult(barcode)
                                 val parsed = BusinessCardOcrParser.parseQrPayload(barcode)
                                 if (parsed.parsedValues.isNotEmpty()) {
                                     flowViewModel.setOcrResult(parsed)
                                 }
                                 vibrate()
-                                if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
-                                    (activity as? FlowHost)?.onQrScanDone()
+                                viewLifecycleOwner.lifecycleScope.launch {
+                                    kotlinx.coroutines.delay(1000)
+                                    flowViewModel.setProcessing(false)
+                                    if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                                        (activity as? FlowHost)?.onQrScanDone()
+                                    }
                                 }
                             }
                         }
