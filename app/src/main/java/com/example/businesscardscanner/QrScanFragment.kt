@@ -114,7 +114,11 @@ class QrScanFragment : Fragment() {
                 android.widget.Toast.makeText(requireContext(), "No QR code detected. Try again or switch to card capture.", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
-        binding.root.findViewById<View>(R.id.btnRightAction)?.setOnClickListener {
+        // Hide the right action button in the bottom navigation per user request
+        binding.root.findViewById<View>(R.id.btnRightAction)?.visibility = View.INVISIBLE
+
+        // Hook up the top card button to switch to card capture
+        binding.btnSwitchCard.setOnClickListener {
             flowViewModel.setCaptureMode(CaptureMode.CARD)
             (activity as? FlowHost)?.onScanCardRequested()
         }

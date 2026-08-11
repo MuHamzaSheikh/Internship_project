@@ -127,9 +127,9 @@ class CaptureFragment : Fragment() {
         binding.root.findViewById<View>(R.id.btnDone)?.setOnClickListener {
             captureImage()
         }
-        binding.root.findViewById<View>(R.id.btnRightAction)?.setOnClickListener {
-            (activity as? FlowHost)?.onScanQrRequested()
-        }
+        // Hide the right action button in the bottom navigation per user request
+        binding.root.findViewById<View>(R.id.btnRightAction)?.visibility = View.INVISIBLE
+
         binding.btnSwitchQr.setOnClickListener {
             (activity as? FlowHost)?.onScanQrRequested()
         }
