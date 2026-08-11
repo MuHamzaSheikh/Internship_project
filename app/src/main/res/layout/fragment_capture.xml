@@ -59,16 +59,64 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="24dp" />
-
-        <ImageView
-            android:id="@+id/overlayBrackets"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:importantForAccessibility="no"
-            android:src="@drawable/capture_corner_brackets" />
     </FrameLayout>
+
+    <!-- The target bounds -->
+    <ImageView
+        android:id="@+id/overlayBrackets"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintDimensionRatio="34:20"
+        app:layout_constraintTop_toTopOf="@id/scanFrame"
+        app:layout_constraintBottom_toBottomOf="@id/scanFrame"
+        app:layout_constraintStart_toStartOf="@id/scanFrame"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no"
+        android:src="@drawable/capture_corner_brackets" />
+
+    <!-- Top scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/scanFrame"
+        app:layout_constraintBottom_toTopOf="@id/overlayBrackets"
+        app:layout_constraintStart_toStartOf="@id/scanFrame"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame" />
+
+    <!-- Bottom scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/scanFrame"
+        app:layout_constraintStart_toStartOf="@id/scanFrame"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame" />
+
+    <!-- Left scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintStart_toStartOf="@id/scanFrame"
+        app:layout_constraintEnd_toStartOf="@id/overlayBrackets" />
+
+    <!-- Right scrim -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintTop_toTopOf="@id/overlayBrackets"
+        app:layout_constraintBottom_toBottomOf="@id/overlayBrackets"
+        app:layout_constraintStart_toEndOf="@id/overlayBrackets"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame" />
 
     <!-- Front/Back pill indicator -->
     <TextView
