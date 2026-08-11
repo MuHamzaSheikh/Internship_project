@@ -88,5 +88,12 @@ class BusinessCardAdapter(
             popupWindow.dismiss()
         }
         popupWindow.showAsDropDown(anchor, -260, 12)
+        
+        val container = popupWindow.contentView.rootView
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+        val p = container.layoutParams as android.view.WindowManager.LayoutParams
+        p.flags = p.flags or android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
+        p.dimAmount = 0.5f
+        wm.updateViewLayout(container, p)
     }
 }
