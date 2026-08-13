@@ -13,14 +13,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.businesscardscanner.dialogs.CameraPermissionDialog
 import com.example.businesscardscanner.repository.BusinessCardRepository
 import com.example.businesscardscanner.utils.PermissionUtils
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -29,8 +26,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var toolbar: Toolbar
     private lateinit var tabLayout: TabLayout
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
     private var currentTabPosition = 0
     private var searchView: SearchView? = null
     private var currentFragment: Fragment? = null
@@ -55,7 +50,6 @@ class MainActivity : AppCompatActivity() {
         setupTabs()
         observeCategories()
         setupClickListeners()
-        setupDrawer()
 
         if (savedInstanceState == null) {
             loadAllCards()
@@ -65,15 +59,9 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         toolbar = findViewById(R.id.toolbar)
         tabLayout = findViewById(R.id.tabCategories)
-        drawerLayout = findViewById(R.id.drawerLayout)
-        navigationView = findViewById(R.id.navigationView)
     }
 
     private fun setupToolbar() {
-
-        toolbar.setNavigationOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
 
         toolbar.setOnMenuItemClickListener { item ->
 
@@ -155,39 +143,6 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<CardView>(R.id.cardScan).setOnClickListener {
             requestCameraFlow()
-        }
-    }
-
-    private fun setupDrawer() {
-
-        navigationView.setNavigationItemSelectedListener { item ->
-
-            when (item.itemId) {
-
-                R.id.nav_privacy -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                }
-
-                R.id.nav_share -> {
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Try the Business Card Scanner app.")
-                    }
-                    startActivity(Intent.createChooser(intent, "Share"))
-                }
-
-                R.id.nav_rate -> {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
-                    try {
-                        startActivity(intent)
-                    } catch (_: ActivityNotFoundException) {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
-                    }
-                }
-            }
-
-            drawerLayout.closeDrawer(GravityCompat.START)
-            true
         }
     }
 

@@ -93,6 +93,7 @@
             android:background="@android:color/transparent"
             app:tabBackground="@drawable/tab_indicator"
             app:tabGravity="center"
+            app:tabMinWidth="16dp"
             app:tabIndicatorHeight="0dp"
             app:tabPaddingStart="4dp"
             app:tabPaddingEnd="4dp"
@@ -163,85 +164,87 @@
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 1" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
-                <EditText android:id="@+id/etPhone" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:hint="Michal Smith" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:inputType="phone" />
-                <ImageView android:id="@+id/btnActionCall" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_phone" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-                <ImageView android:id="@+id/btnActionSms" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_message" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-            </LinearLayout>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="0123456789"
+                android:inputType="phone"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawableEnd="@drawable/ic_dropdown_arrow"
+                android:drawablePadding="8dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
 
-            <TextView android:id="@+id/tvPhoneSecondaryLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 2" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <LinearLayout android:id="@+id/llPhoneSecondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
-                <EditText android:id="@+id/etPhoneSecondary" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:hint="Optional" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:inputType="phone" />
-                <ImageView android:id="@+id/btnActionCallSecondary" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_phone" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-                <ImageView android:id="@+id/btnActionSmsSecondary" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_message" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Email" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
-                <EditText android:id="@+id/etEmail" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:hint="Michal Smith" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:inputType="textEmailAddress" />
-                <ImageView android:id="@+id/btnActionEmail" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_email" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-            </LinearLayout>
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Address" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
-                <EditText android:id="@+id/etAddress" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="44dp" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:hint="Michal Smith" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="12dp" android:paddingBottom="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:inputType="textMultiLine|textNoSuggestions" android:minLines="2" />
-                <ImageView android:id="@+id/btnActionMap" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp" android:src="@drawable/ic_map" android:background="?attr/selectableItemBackgroundBorderless" app:tint="@color/PrimaryBlue" />
-            </LinearLayout>
-            <TextView android:id="@+id/tvDescriptionLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Description" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="88dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Extracted description..." android:padding="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:gravity="top|start" android:inputType="textMultiLine" />
             
-            <TextView android:id="@+id/tvNotesLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Notes" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="88dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Add notes here..." android:padding="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" android:gravity="top|start" android:inputType="textMultiLine" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Email" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="Michal Smith"
+                android:inputType="textEmailAddress"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Address" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="Building # 123, 1st Floor Apartment no 101"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:minHeight="44dp"
+                android:minLines="2"
+                android:paddingStart="12dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="12dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
+                        <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="Street,123 New City"
+                android:inputType="text"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawableEnd="@drawable/ic_map"
+                android:drawablePadding="8dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnSaveToContacts"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="18dp"
-            android:layout_marginEnd="16dp"
-            style="?attr/materialButtonOutlinedStyle"
-            android:text="Save to Device Contacts"
-            android:textAllCaps="false"
-            android:textColor="@color/PrimaryBlue"
-            app:strokeColor="@color/PrimaryBlue"
-            app:layout_constraintTop_toBottomOf="@id/formBlock"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
-            android:id="@+id/btnExportPdf"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            style="?attr/materialButtonOutlinedStyle"
-            android:text="Export as PDF"
-            android:textAllCaps="false"
-            android:textColor="@color/PrimaryBlue"
-            app:strokeColor="@color/PrimaryBlue"
-            app:layout_constraintTop_toBottomOf="@id/btnSaveToContacts"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <Button
+                <Button
             android:id="@+id/btnSaveCard"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/btn_skip"
-            android:backgroundTint="@null"
             android:text="Save Card"
             android:textAllCaps="false"
             android:textColor="@color/TextPrimary"
-            app:layout_constraintTop_toBottomOf="@id/btnExportPdf"
+            app:strokeColor="@color/PrimaryBlue"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/formBlock" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

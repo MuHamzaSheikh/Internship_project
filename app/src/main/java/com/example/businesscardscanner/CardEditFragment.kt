@@ -95,24 +95,8 @@ class CardEditFragment : Fragment() {
             binding.cardPreviewContainer.visibility = if (isQrMode) View.GONE else View.VISIBLE
             binding.pageDots.visibility = if (isQrMode) View.GONE else (if (images.size > 1) View.VISIBLE else View.GONE)
             
-            // Hide action buttons in QR mode to match simplified mockup (REVERTED: keep them visible)
-            binding.btnActionCall.visibility = View.VISIBLE
-            binding.btnActionSms.visibility = View.VISIBLE
-            binding.btnActionCallSecondary.visibility = View.VISIBLE
-            binding.btnActionSmsSecondary.visibility = View.VISIBLE
-            binding.btnActionEmail.visibility = View.VISIBLE
-            binding.btnActionMap.visibility = View.VISIBLE
+            if (isQrMode) View.GONE else View.VISIBLE
             
-            // Hide secondary fields and extra buttons
-            val actionVisibility = if (isQrMode) View.GONE else View.VISIBLE
-            binding.tvPhoneSecondaryLabel.visibility = actionVisibility
-            binding.llPhoneSecondary.visibility = actionVisibility
-            binding.tvDescriptionLabel.visibility = actionVisibility
-            binding.etDescription.visibility = actionVisibility
-            binding.tvNotesLabel.visibility = actionVisibility
-            binding.etNotes.visibility = actionVisibility
-            binding.btnSaveToContacts.visibility = actionVisibility
-            binding.btnExportPdf.visibility = actionVisibility
             
             if (isQrMode) {
                 binding.btnSaveCard.setBackgroundResource(R.drawable.edit_text_outline)
@@ -189,11 +173,7 @@ class CardEditFragment : Fragment() {
                     jobTitle = binding.etJob.text.toString(),
                     company = binding.etCompany.text.toString(),
                     phone = binding.etPhone.text.toString(),
-                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
-                    email = binding.etEmail.text.toString(),
-                    address = binding.etAddress.text.toString(),
-                    description = binding.etDescription.text.toString(),
-                    notes = binding.etNotes.text.toString(),
+                    description = binding.etLocation.text.toString(),
                     updatedAt = System.currentTimeMillis()
                 ) ?: BusinessCard(
                     id = cardId ?: state.pendingCard?.id ?: BusinessCard().id,
@@ -203,12 +183,7 @@ class CardEditFragment : Fragment() {
                     jobTitle = binding.etJob.text.toString(),
                     company = binding.etCompany.text.toString(),
                     phone = binding.etPhone.text.toString(),
-                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
-                    email = binding.etEmail.text.toString(),
-                    website = state.ocrResult?.website?.value.orEmpty(),
-                    address = binding.etAddress.text.toString(),
-                    description = binding.etDescription.text.toString(),
-                    notes = binding.etNotes.text.toString(),
+                    description = binding.etLocation.text.toString(),
                     group = selectedGroup,
                     qrText = state.qrText,
                     qrTimestamp = state.qrTimestamp,
@@ -234,78 +209,69 @@ class CardEditFragment : Fragment() {
     private fun setupQuickActions(view: View) {
         val context = requireContext()
         val etPhone = binding.etPhone
-        val etEmail = binding.etEmail
-        val etAddress = binding.etAddress
-        val etName = binding.etName
-        val etCompany = binding.etCompany
-        val etJob = binding.etJob
-
-        binding.btnActionCall.setOnClickListener {
-            val number = etPhone.text.toString().trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+        val etLocation = binding.etLocation
+        
+        etPhone.setOnTouchListener { v, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP) {
+                if (event.rawX >= (etPhone.right - etPhone.compoundDrawables[2].bounds.width() - 40)) {
+                    val popupBinding = com.example.businesscardscanner.databinding.LayoutPhonePopupBinding.inflate(LayoutInflater.from(context))
+                    val popupWindow = android.widget.PopupWindow(
+                        popupBinding.root,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        true
+                    )
+                    popupWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                    
+                    popupBinding.actionCall.setOnClickListener {
+                        val number = etPhone.text.toString().trim()
+                        if (number.isNotBlank()) {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:"))
+                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+                        }
+                        popupWindow.dismiss()
+                    }
+                    popupBinding.actionWhatsapp.setOnClickListener {
+                        val number = etPhone.text.toString().trim()
+                        if (number.isNotBlank()) {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://api.whatsapp.com/send?phone="))
+                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "WhatsApp not found", android.widget.Toast.LENGTH_SHORT).show() }
+                        }
+                        popupWindow.dismiss()
+                    }
+                    popupBinding.actionMessenger.setOnClickListener {
+                        val number = etPhone.text.toString().trim()
+                        if (number.isNotBlank()) {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("fb-messenger://user-thread/"))
+                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "Messenger not found", android.widget.Toast.LENGTH_SHORT).show() }
+                        }
+                        popupWindow.dismiss()
+                    }
+                    
+                    popupBinding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                    val xOffset = -popupBinding.root.measuredWidth + etPhone.width
+                    popupWindow.showAsDropDown(etPhone, xOffset, 0)
+                    v.performClick()
+                    return@setOnTouchListener true
+                }
             }
+            false
         }
         
-        binding.btnActionSms.setOnClickListener {
-            val number = etPhone.text.toString().trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
+        etLocation.setOnTouchListener { v, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP) {
+                if (event.rawX >= (etLocation.right - etLocation.compoundDrawables[2].bounds.width() - 40)) {
+                    val address = etLocation.text.toString().trim()
+                    if (address.isNotBlank()) {
+                        val encoded = android.net.Uri.encode(address)
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q="))
+                        try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
+                    }
+                    v.performClick()
+                    return@setOnTouchListener true
+                }
             }
-        }
-        
-        binding.btnActionCallSecondary.setOnClickListener {
-            val number = binding.etPhoneSecondary.text.toString().trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnActionSmsSecondary.setOnClickListener {
-            val number = binding.etPhoneSecondary.text.toString().trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnActionEmail.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            if (email.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:$email"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No email app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnActionMap.setOnClickListener {
-            val address = etAddress.text.toString().trim()
-            if (address.isNotBlank()) {
-                val encoded = android.net.Uri.encode(address)
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=$encoded"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnSaveToContacts.setOnClickListener {
-            val intent = android.content.Intent(android.content.Intent.ACTION_INSERT).apply {
-                type = android.provider.ContactsContract.Contacts.CONTENT_TYPE
-                putExtra(android.provider.ContactsContract.Intents.Insert.NAME, etName.text.toString().trim())
-                putExtra(android.provider.ContactsContract.Intents.Insert.COMPANY, etCompany.text.toString().trim())
-                putExtra(android.provider.ContactsContract.Intents.Insert.JOB_TITLE, etJob.text.toString().trim())
-                putExtra(android.provider.ContactsContract.Intents.Insert.PHONE, etPhone.text.toString().trim())
-                putExtra(android.provider.ContactsContract.Intents.Insert.EMAIL, etEmail.text.toString().trim())
-                putExtra(android.provider.ContactsContract.Intents.Insert.POSTAL, etAddress.text.toString().trim())
-            }
-            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No contacts app found", android.widget.Toast.LENGTH_SHORT).show() }
-        }
-
-        binding.btnExportPdf.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                exportPdf()
-            }
+            false
         }
     }
 
@@ -380,10 +346,9 @@ class CardEditFragment : Fragment() {
         bindOcrField(binding.etJob, pickField(front?.jobTitle, back?.jobTitle))
         bindOcrField(binding.etCompany, pickField(front?.company, back?.company))
         bindOcrField(binding.etPhone, pickField(front?.phone, back?.phone))
-        bindOcrField(binding.etPhoneSecondary, pickField(front?.phoneSecondary, back?.phoneSecondary))
         bindOcrField(binding.etEmail, pickField(front?.email, back?.email))
         bindOcrField(binding.etAddress, pickField(front?.address, back?.address))
-        bindOcrField(binding.etDescription, pickField(front?.description, back?.description))
+        bindOcrField(binding.etLocation, pickField(front?.description, back?.description))
     }
 
     private fun bindCard(view: View, card: BusinessCard) {
@@ -392,11 +357,9 @@ class CardEditFragment : Fragment() {
         binding.etJob.setText(card.jobTitle)
         binding.etCompany.setText(card.company)
         binding.etPhone.setText(card.phone)
-        binding.etPhoneSecondary.setText(card.phoneSecondary)
         binding.etEmail.setText(card.email)
         binding.etAddress.setText(card.address)
-        binding.etDescription.setText(card.description)
-        binding.etNotes.setText(card.notes)
+        binding.etLocation.setText(card.description)
     }
 
     override fun onDestroyView() {

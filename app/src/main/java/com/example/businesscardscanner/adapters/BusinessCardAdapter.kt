@@ -87,7 +87,9 @@ class BusinessCardAdapter(
             onShare(card)
             popupWindow.dismiss()
         }
-        popupWindow.showAsDropDown(anchor, -260, 12)
+        binding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val xOffset = -binding.root.measuredWidth + anchor.width
+        popupWindow.showAsDropDown(anchor, xOffset, 0)
         
         val container = popupWindow.contentView.rootView
         val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager

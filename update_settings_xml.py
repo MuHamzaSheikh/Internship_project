@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿content = '''<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -230,3 +230,8 @@
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+'''
+
+with open('app/src/main/res/layout/activity_settings.xml', 'w') as f:
+    f.write(content)
+print("Updated activity_settings.xml")
