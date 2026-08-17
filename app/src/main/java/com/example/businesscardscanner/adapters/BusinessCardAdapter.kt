@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.businesscardscanner.R
 import com.example.businesscardscanner.databinding.ItemBusinessCardBinding
 import com.example.businesscardscanner.databinding.LayoutCardPopupBinding
-import com.example.businesscardscanner.dialogs.DeleteCardDialog
+
 import com.example.businesscardscanner.models.BusinessCard
 import coil.load
 
@@ -80,7 +80,7 @@ class BusinessCardAdapter(
             popupWindow.dismiss()
         }
         binding.actionDelete.setOnClickListener {
-            DeleteCardDialog(context, onCancel = {}, onDelete = { onDelete(card) }).show()
+            onDelete(card)
             popupWindow.dismiss()
         }
         binding.actionShare.setOnClickListener {

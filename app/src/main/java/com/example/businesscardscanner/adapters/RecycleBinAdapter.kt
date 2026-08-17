@@ -27,7 +27,6 @@ class RecycleBinAdapter(
             imgRecycleCard.load(card.imageUri) {
                 placeholder(R.drawable.card_reference)
                 error(R.drawable.card_reference)
-                transformations(coil.transform.CircleCropTransformation())
             }
             tvRecycleName.text = card.name
             tvRecycleRole.text = card.jobTitle.ifBlank { card.company }
