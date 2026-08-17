@@ -29,12 +29,11 @@
 
     <ImageView
         android:id="@+id/btnSwitchCard"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:layout_marginStart="24dp"
         android:src="@drawable/ic_scan_id_card"
-        android:padding="12dp"
         app:tint="#FFFFFF"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
