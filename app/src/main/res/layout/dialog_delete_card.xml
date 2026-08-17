@@ -26,7 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Delete Card ?"
+                android:text="@string/str_delete_card"
                 android:textColor="@color/PrimaryBlue"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:gravity="center"
-                android:text="This Card Will be moved to recycle bin."
+                android:text="@string/str_this_card_will_be_moved_to_rec"
                 android:textColor="@color/TextPrimary"
                 android:textSize="14sp" />
 
@@ -59,7 +59,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/btn_neutral"
                     android:backgroundTint="@null"
-                    android:text="Cancel"
+                    android:text="@string/str_cancel"
                     android:textAllCaps="false"
                     android:textColor="@color/TextPrimary" />
 
@@ -71,7 +71,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/btn_allow"
                     android:backgroundTint="@null"
-                    android:text="Yes, Delete"
+                    android:text="@string/str_yes_delete"
                     android:textAllCaps="false"
                     android:textColor="@color/white" />
             </LinearLayout>

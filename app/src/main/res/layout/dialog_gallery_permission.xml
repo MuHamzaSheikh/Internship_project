@@ -46,7 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Gallery"
+                android:text="@string/str_gallery"
                 android:textColor="@color/TextPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -57,7 +57,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="22dp"
                 android:gravity="center"
-                android:text="Allow business card scanner to access photos on this device?"
+                android:text="@string/str_allow_business_card_scanner_to"
                 android:textColor="@color/TextSecondary"
                 android:textSize="14sp" />
 
@@ -67,7 +67,7 @@
                 android:layout_height="48dp"
                 android:background="@drawable/btn_allow"
                 android:backgroundTint="@null"
-                android:text="Allow"
+                android:text="@string/str_allow"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
@@ -79,7 +79,7 @@
                 android:layout_marginTop="12dp"
                 android:background="@drawable/btn_skip"
                 android:backgroundTint="@null"
-                android:text="Skip for now"
+                android:text="@string/str_skip_for_now"
                 android:textAllCaps="false"
                 android:textColor="@color/TextPrimary"
                 android:textSize="16sp" />

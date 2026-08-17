@@ -85,7 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Processing..."
+                android:text="@string/str_processing"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -115,7 +115,7 @@
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Auto (Recommended)"
+                android:text="@string/str_auto_recommended"
                 android:checked="true" />
 
             <com.google.android.material.chip.Chip
@@ -123,49 +123,49 @@
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Original" />
+                android:text="@string/str_original" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSharpen"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sharpen" />
+                android:text="@string/str_sharpen" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBW"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="B&amp;W" />
+                android:text="@string/str_b_amp_w" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipHighContrast"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="High Contrast" />
+                android:text="@string/str_high_contrast" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBWScan"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="B&amp;W Scan" />
+                android:text="@string/str_b_amp_w_scan" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipShadowRemove"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Shadow Remove" />
+                android:text="@string/str_shadow_remove" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipMagicColor"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Magic Color" />
+                android:text="@string/str_magic_color" />
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>

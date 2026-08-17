@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Business Card Scanner"
+            android:text="@string/str_business_card_scanner"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Scan your business cards instantly"
+            android:text="@string/str_scan_your_business_cards_insta"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
     </LinearLayout>

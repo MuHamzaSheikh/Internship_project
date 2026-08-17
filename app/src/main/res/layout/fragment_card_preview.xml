@@ -26,7 +26,7 @@
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Card Preview"
+            android:text="@string/str_card_preview"
             android:textColor="@color/TextPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:text="Edit"
+            android:text="@string/str_edit"
             android:textColor="@color/PrimaryBlue"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="Contact Information"
+            android:text="@string/str_contact_information"
             android:textColor="@color/TextPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -123,42 +123,42 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Group Tag" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_group_tag" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Name" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_name" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Job Title" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_job_title" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtJob" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Company" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_company" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtCompany" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 1" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone_1" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
                 <TextView android:id="@+id/txtPhone" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" android:drawableEnd="@drawable/ic_dropdown_arrow" android:drawablePadding="8dp" />
             </LinearLayout>
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 2" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone_2" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
                 <TextView android:id="@+id/txtPhoneSecondary" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" android:drawableEnd="@drawable/ic_dropdown_arrow" android:drawablePadding="8dp" />
             </LinearLayout>
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Email" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_email" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
                 <TextView android:id="@+id/txtEmail" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" android:drawableEnd="@drawable/ic_email" android:drawablePadding="8dp" />
             </LinearLayout>
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Location" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_location" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="4dp">
                 <TextView android:id="@+id/txtLocation" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" android:drawableEnd="@drawable/ic_map" android:drawablePadding="8dp" />
             </LinearLayout>
             
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Extra Information" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_extra_information" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Notes" android:textColor="@color/TextSecondary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_notes" android:textColor="@color/TextSecondary" android:textSize="13sp" />
             <TextView android:id="@+id/txtNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:background="@drawable/edit_text_outline" android:padding="12dp" android:textColor="@color/TextPrimary" />
         </LinearLayout>
         
@@ -170,7 +170,7 @@
             android:layout_marginTop="18dp"
             android:layout_marginEnd="16dp"
             style="?attr/materialButtonOutlinedStyle"
-            android:text="Save to Device Contacts"
+            android:text="@string/str_save_to_device_contacts"
             android:textAllCaps="false"
             android:textColor="@color/PrimaryBlue"
             app:strokeColor="@color/PrimaryBlue"

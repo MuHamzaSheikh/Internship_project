@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:text="Share with Friends"
+            android:text="@string/str_share_with_friends"
             android:textColor="@color/TextPrimary"
             android:textSize="15sp" />
     </LinearLayout>

@@ -127,7 +127,7 @@
         android:background="@drawable/pill_background"
         android:paddingHorizontal="16dp"
         android:paddingVertical="4dp"
-        android:text="Front"
+        android:text="@string/str_front"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/bottomActions"

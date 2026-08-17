@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Call on Phone"
+                android:text="@string/str_call_on_phone"
                 android:textColor="@color/TextPrimary"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Whatsapp"
+                android:text="@string/str_whatsapp"
                 android:textColor="@color/TextPrimary"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -86,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Messenger"
+                android:text="@string/str_messenger"
                 android:textColor="@color/TextPrimary"
                 android:textSize="14sp" />
         </LinearLayout>

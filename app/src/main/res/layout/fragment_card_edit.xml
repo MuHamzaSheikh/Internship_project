@@ -26,7 +26,7 @@
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Card Detail"
+            android:text="@string/str_card_detail"
             android:textColor="@color/TextPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -106,7 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="Contact Information"
+            android:text="@string/str_contact_information"
             android:textColor="@color/TextPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -125,7 +125,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Group Tag" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/str_group_tag" android:textColor="@color/TextPrimary" android:textSize="13sp" />
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/etGroup"
             android:layout_width="match_parent"
@@ -134,7 +134,7 @@
             android:background="@drawable/edit_text_outline"
             android:drawableEnd="@drawable/ic_dropdown_arrow"
             android:drawablePadding="8dp"
-            android:hint="Select Group"
+            android:hint="@string/str_select_group"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textColor="@color/TextPrimary"
@@ -144,34 +144,34 @@
             android:focusable="false"
             android:inputType="none" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Name" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Name" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_name" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_name" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Job Title" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Job Title" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_job_title" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_job_title" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Company" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_company" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etCompany"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Company Name"
+                android:hint="@string/str_company_name"
                 android:inputType="textCapWords"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etPhone"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Phone Number"
+                android:hint="@string/str_phone_number"
                 android:inputType="phone"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
@@ -180,14 +180,14 @@
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 2 (Optional)" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone_2_optional" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etPhoneSecondary"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Phone Number"
+                android:hint="@string/str_phone_number"
                 android:inputType="phone"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
@@ -198,14 +198,14 @@
 
             
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Email" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_email" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Email Address"
+                android:hint="@string/str_email_address"
                 android:inputType="textEmailAddress"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
@@ -214,14 +214,14 @@
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-            <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Location"
+                android:hint="@string/str_location"
                 android:inputType="textMultiLine|textNoSuggestions"
                 android:minHeight="44dp"
                 android:minLines="2"
@@ -234,14 +234,14 @@
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Extra Information" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_extra_information" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
                 android:id="@+id/etDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Any other extracted text"
+                android:hint="@string/str_any_other_extracted_text"
                 android:inputType="textMultiLine|textNoSuggestions"
                 android:minHeight="44dp"
                 android:minLines="2"
@@ -259,7 +259,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:text="Save Card"
+            android:text="@string/str_save_card"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="16sp"

@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:text="Auto Resume"
+            android:text="@string/str_auto_resume"
             android:textColor="@color/TextPrimary"
             android:textSize="15sp" />
 

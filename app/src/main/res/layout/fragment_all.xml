@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="No Record Found Yet !"
+        android:text="@string/str_no_record_found_yet"
         android:textColor="@color/textColorHint"
         android:textSize="@dimen/text_size_regular"
         android:textStyle="bold"

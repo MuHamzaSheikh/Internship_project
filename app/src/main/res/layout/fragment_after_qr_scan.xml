@@ -31,7 +31,7 @@
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Card Detail"
+            android:text="@string/str_card_detail"
             android:textColor="@color/TextPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            android:text="Contact Information"
+            android:text="@string/str_contact_information"
             android:textColor="@color/TextPrimary"
             android:textSize="17sp"
             android:textStyle="bold"
@@ -71,7 +71,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Group Tag"
+                android:text="@string/str_group_tag"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -81,7 +81,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="VIP"
+                android:hint="@string/str_vip"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
@@ -92,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Name"
+                android:text="@string/str_name"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -102,7 +102,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Michal Smith"
+                android:hint="@string/str_michal_smith"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Job Title"
+                android:text="@string/str_job_title"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -123,7 +123,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Marketing Manager"
+                android:hint="@string/str_marketing_manager"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
@@ -134,7 +134,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Company"
+                android:text="@string/str_company"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -144,7 +144,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="ABC Company"
+                android:hint="@string/str_abc_company"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
@@ -155,7 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Phone"
+                android:text="@string/str_phone"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -165,7 +165,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="+000 12345 6789"
+                android:hint="@string/str_000_12345_6789"
                 android:inputType="phone"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
@@ -177,7 +177,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Email"
+                android:text="@string/str_email"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -187,7 +187,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="abc@email.com"
+                android:hint="@string/str_abc_email_com"
                 android:inputType="textEmailAddress"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
@@ -199,7 +199,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Address"
+                android:text="@string/str_address"
                 android:textColor="@color/TextPrimary"
                 android:textSize="13sp" />
 
@@ -209,7 +209,7 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Street Name"
+                android:hint="@string/str_street_name"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
@@ -225,7 +225,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:text="Save Card"
+            android:text="@string/str_save_card"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="16sp"

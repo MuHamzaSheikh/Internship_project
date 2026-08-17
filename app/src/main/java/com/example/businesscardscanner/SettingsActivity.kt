@@ -30,14 +30,24 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("auto_resume", isChecked).apply()
         }
 
-        val languages = arrayOf("English", "Urdu", "Spanish", "French", "German", "Chinese")
+        val languages = arrayOf("English", "Urdu", "Spanish")
+        val languageCodes = arrayOf("en", "ur", "es")
+        
+        var currentLangIndex = 0
+        val currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales()
+        if (!currentLocales.isEmpty) {
+            val currentLang = currentLocales.get(0)?.language
+            currentLangIndex = languageCodes.indexOf(currentLang).takeIf { it >= 0 } ?: 0
+        }
+
         binding.btnLanguages.setOnClickListener {
-            val currentLangIndex = prefs.getInt("selected_language", 0)
             MaterialAlertDialogBuilder(this)
-                .setTitle("Select Language")
+                .setTitle(getString(R.string.str_languages))
                 .setSingleChoiceItems(languages, currentLangIndex) { dialog, which ->
-                    prefs.edit().putInt("selected_language", which).apply()
-                    Toast.makeText(this, "${languages[which]} selected", Toast.LENGTH_SHORT).show()
+                    val selectedCode = languageCodes[which]
+                    androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
+                        androidx.core.os.LocaleListCompat.forLanguageTags(selectedCode)
+                    )
                     dialog.dismiss()
                 }
                 .show()

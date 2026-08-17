@@ -19,7 +19,7 @@
         android:id="@+id/settingsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Setting"
+        android:text="@string/str_setting"
         android:textColor="@color/TextPrimary"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="General"
+                android:text="@string/str_general"
                 android:textColor="@color/TextPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -84,7 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Auto Resume"
+                        android:text="@string/str_auto_resume"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
 
@@ -128,7 +128,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Languages"
+                        android:text="@string/str_languages"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
 
@@ -170,7 +170,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Privacy Policy"
+                        android:text="@string/str_privacy_policy"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
                 </LinearLayout>
@@ -206,7 +206,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="About"
+                        android:text="@string/str_about"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
                 </LinearLayout>
@@ -215,7 +215,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Feedback"
+                android:text="@string/str_feedback"
                 android:textColor="@color/TextPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -251,7 +251,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Share with Friends"
+                        android:text="@string/str_share_with_friends"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
                 </LinearLayout>
@@ -287,7 +287,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_weight="1"
-                        android:text="Rate Us"
+                        android:text="@string/str_rate_us"
                         android:textColor="@color/TextPrimary"
                         android:textSize="15sp" />
                 </LinearLayout>

@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:paddingBottom="10dp"
-        android:text="Business card scanner"
+        android:text="@string/str_business_card_scanner"
         android:textColor="@color/TextPrimary"
         android:textSize="18sp"
         android:textStyle="bold" />

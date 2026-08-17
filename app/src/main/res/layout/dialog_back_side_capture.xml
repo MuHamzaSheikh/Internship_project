@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Take Picture"
+            android:text="@string/str_take_picture"
             android:textColor="@color/PrimaryBlue"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:gravity="center"
-            android:text="Take a picture from backside of your card !"
+            android:text="@string/str_take_a_picture_from_backside_o"
             android:textColor="@color/TextPrimary"
             android:textSize="14sp" />
 
@@ -52,7 +52,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Skip"
+                android:text="@string/str_skip"
                 android:textColor="@color/TextPrimary"
                 android:textAllCaps="false"
                 app:backgroundTint="#F5F5F5"
@@ -65,7 +65,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1.2"
                 android:layout_marginStart="8dp"
-                android:text="Back Side Picture"
+                android:text="@string/str_back_side_picture"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
                 app:backgroundTint="@color/PrimaryBlue"

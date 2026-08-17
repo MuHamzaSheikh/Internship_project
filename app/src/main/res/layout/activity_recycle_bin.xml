@@ -19,7 +19,7 @@
         android:id="@+id/binTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recycle Bin"
+        android:text="@string/str_recycle_bin"
         android:textColor="@color/TextPrimary"
         android:textSize="20sp"
         android:textStyle="bold"

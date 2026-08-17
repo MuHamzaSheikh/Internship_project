@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_gravity="start|center_vertical"
-                android:text="Card Scanner"
+                android:text="@string/str_card_scanner"
                 android:textColor="@color/TextPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
@@ -83,7 +83,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Tap to scan Card"
+                    android:text="@string/str_tap_to_scan_card"
                     android:textColor="@color/TextPrimary"
                     android:textSize="20sp"
                     android:textStyle="bold"/>

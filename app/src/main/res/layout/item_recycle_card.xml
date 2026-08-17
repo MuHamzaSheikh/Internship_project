@@ -41,7 +41,7 @@
                     android:id="@+id/tvRecycleName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Michal Johns"
+                    android:text="@string/str_michal_johns"
                     android:textColor="@color/TextPrimary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -51,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Marketing Manager"
+                    android:text="@string/str_marketing_manager"
                     android:textColor="@color/TextSecondary"
                     android:textSize="12sp" />
 
@@ -60,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="+000 12345 6789"
+                    android:text="@string/str_000_12345_6789"
                     android:textColor="@color/TextSecondary"
                     android:textSize="12sp" />
 
@@ -69,7 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Today"
+                    android:text="@string/str_today"
                     android:textColor="@color/TextSecondary"
                     android:textSize="12sp" />
 
@@ -78,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Client"
+                    android:text="@string/str_client"
                     android:textColor="@color/TextPrimary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -98,7 +98,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/btn_neutral"
                 android:backgroundTint="@null"
-                android:text="Restore"
+                android:text="@string/str_restore"
                 android:textAllCaps="false"
                 android:textColor="@color/TextPrimary" />
 
@@ -110,7 +110,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/btn_allow"
                 android:backgroundTint="@null"
-                android:text="Delete Permanent"
+                android:text="@string/str_delete_permanent"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
         </LinearLayout>
