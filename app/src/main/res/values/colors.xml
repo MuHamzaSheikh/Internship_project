@@ -2,8 +2,8 @@
 <resources>
 
     <color name="PrimaryBlue">#4F6BFF</color>
-    <color name="Background">#FFFFFF</color>
-    <color name="Surface">#F8F9FA</color>
+    <color name="Background">#F1F1F1</color>
+    <color name="Surface">#F1F1F1</color>
     <color name="TextPrimary">#1C1C1C</color>
     <color name="TextSecondary">#757575</color>
 
@@ -11,7 +11,7 @@
     <color name="splashBlue">@color/PrimaryBlue</color>
     <color name="colorPrimary">@color/PrimaryBlue</color>
     <color name="colorAccent">@color/PrimaryBlue</color>
-    <color name="white">@color/Background</color>
+    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="tabSelectedBackground">@color/PrimaryBlue</color>
     <color name="tabUnselectedBackground">@color/Background</color>

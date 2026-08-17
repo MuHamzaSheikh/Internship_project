@@ -23,7 +23,9 @@ data class CardFlowState(
     val isProcessing: Boolean = false,
     val errorMessage: String? = null,
     val captureMode: CaptureMode = CaptureMode.CARD,
-    val captureSide: CaptureSide = CaptureSide.FRONT
+    val captureSide: CaptureSide = CaptureSide.FRONT,
+    val isRetaking: Boolean = false,
+    val isRetakingBothSides: Boolean = false
 ) {
     /**
      * DEDICATED OCR SOURCE:
@@ -59,8 +61,8 @@ class CardFlowViewModel : ViewModel() {
         _state.value = _state.value.copy(captureSide = side)
     }
 
-    fun setOcrResult(result: OcrResult) {
-        val updated = when (_state.value.captureSide) {
+    fun setOcrResult(result: OcrResult, side: CaptureSide = _state.value.captureSide) {
+        val updated = when (side) {
             CaptureSide.FRONT -> _state.value.copy(frontOcrResult = result)
             CaptureSide.BACK -> _state.value.copy(backOcrResult = result)
         }
@@ -85,6 +87,10 @@ class CardFlowViewModel : ViewModel() {
 
     fun setCaptureMode(mode: CaptureMode) {
         _state.value = _state.value.copy(captureMode = mode)
+    }
+
+    fun setRetaking(isRetaking: Boolean, bothSides: Boolean = false) {
+        _state.value = _state.value.copy(isRetaking = isRetaking, isRetakingBothSides = bothSides)
     }
 
     private fun mergeOcrResults(front: OcrResult?, back: OcrResult?): OcrResult? {

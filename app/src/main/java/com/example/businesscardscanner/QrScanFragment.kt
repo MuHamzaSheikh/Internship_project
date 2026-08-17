@@ -209,14 +209,40 @@ class QrScanFragment : Fragment() {
                                 val parsed = BusinessCardOcrParser.parseQrPayload(barcode)
                                 if (parsed.parsedValues.isNotEmpty()) {
                                     flowViewModel.setOcrResult(parsed)
-                                }
-                                vibrate()
-                                viewLifecycleOwner.lifecycleScope.launch {
-                                    kotlinx.coroutines.delay(1000)
-                                    flowViewModel.setProcessing(false)
-                                    if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
-                                        (activity as? FlowHost)?.onQrScanDone()
+                                    vibrate()
+                                    viewLifecycleOwner.lifecycleScope.launch {
+                                        kotlinx.coroutines.delay(1000)
+                                        flowViewModel.setProcessing(false)
+                                        if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) {
+                                            (activity as? FlowHost)?.onQrScanDone()
+                                        }
                                     }
+                                } else {
+                                    vibrate()
+                                    flowViewModel.setProcessing(false)
+                                    
+                                    val textView = android.widget.TextView(requireContext()).apply {
+                                        text = barcode
+                                        autoLinkMask = android.text.util.Linkify.ALL
+                                        movementMethod = android.text.method.LinkMovementMethod.getInstance()
+                                        setPadding(64, 48, 64, 32)
+                                        textSize = 16f
+                                        setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.TextPrimary))
+                                        setLinkTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.PrimaryBlue))
+                                    }
+                                    
+                                    com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                                        .setTitle("Scanned Content")
+                                        .setView(textView)
+                                        .setPositiveButton("Skip") { _, _ ->
+                                            (activity as? FlowHost)?.onQrScanDone()
+                                        }
+                                        .setNegativeButton("Cancel") { _, _ ->
+                                            scanned = false
+                                            flowViewModel.setQrResult("")
+                                        }
+                                        .setCancelable(false)
+                                        .show()
                                 }
                             }
                         }

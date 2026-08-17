@@ -62,20 +62,7 @@ class CardPreviewFragment : Fragment() {
 
         (pager.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView)?.isNestedScrollingEnabled = false
 
-        fun applyPreviewAspect(uri: android.net.Uri?) {
-            if (uri == null) return
-            val ratio = ImageAspectRatioUtils.getAspectRatio(requireContext(), uri).takeIf { it > 0f } ?: 1f
-            val widthPx = previewContainer.width.takeIf { it > 0 }
-                ?: (resources.displayMetrics.widthPixels - (32 * resources.displayMetrics.density).roundToInt())
-            val heightPx = (widthPx / ratio).roundToInt().coerceAtLeast((160 * resources.displayMetrics.density).roundToInt())
-            
-            if (previewContainer.layoutParams.height != heightPx) {
-                previewContainer.layoutParams = previewContainer.layoutParams.apply { this.height = heightPx }
-                previewContainer.requestLayout()
-                pager.layoutParams = pager.layoutParams.apply { this.height = heightPx }
-                pager.requestLayout()
-            }
-        }
+
 
         fun bindCard(cardIdValue: String) {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -85,14 +72,13 @@ class CardPreviewFragment : Fragment() {
                     pager.setCurrentItem(0, false)
                     TabLayoutMediator(binding.pageDots, pager) { _, _ -> }.attach()
                     updateDots(currentImages.size, 0)
-                    previewContainer.post { applyPreviewAspect(currentImages.firstOrNull()) }
                     binding.txtName.text = card.name.ifBlank { "-" }
                     binding.txtJob.text = card.jobTitle.ifBlank { "-" }
                     binding.txtCompany.text = card.company.ifBlank { "-" }
                     binding.txtPhone.text = card.phone.ifBlank { "-" }
                     binding.txtPhoneSecondary.text = card.phoneSecondary.ifBlank { "-" }
                     binding.txtEmail.text = card.email.ifBlank { "-" }
-                    binding.txtAddress.text = card.address.ifBlank { "-" }
+                    binding.txtLocation.text = card.address.ifBlank { "-" }
                     binding.txtGroup.text = card.group.ifBlank { "-" }
                     binding.txtDescription.text = card.description.ifBlank { "-" }
                     binding.txtNotes.text = card.notes.ifBlank { "-" }
@@ -103,7 +89,7 @@ class CardPreviewFragment : Fragment() {
             }
         }
 
-        back.setOnClickListener { parentFragmentManager.popBackStack() }
+        back.setOnClickListener { requireActivity().finish() }
         edit.setOnClickListener {
             cardId?.let { startActivity(CardWorkflowActivity.createIntent(requireContext(), CardWorkflowActivity.StartStep.CARD_EDIT, it)) }
         }
@@ -111,7 +97,6 @@ class CardPreviewFragment : Fragment() {
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 updateDots(currentImages.size, position)
-                applyPreviewAspect(currentImages.getOrNull(position))
             }
         })
 
@@ -151,53 +136,104 @@ class CardPreviewFragment : Fragment() {
 
     private fun setupQuickActions(view: View, card: com.example.businesscardscanner.models.BusinessCard) {
         val context = requireContext()
-        binding.btnActionCallPreview.setOnClickListener {
-            val number = card.phone.trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+        val txtPhone = binding.txtPhone
+        val txtPhoneSecondary = binding.txtPhoneSecondary
+        val txtEmail = binding.txtEmail
+        val txtLocation = binding.txtLocation
+        
+        fun setupPhonePopup(phoneText: TextView, phoneNumber: String) {
+            phoneText.setOnTouchListener { v, event ->
+                val rightDrawable = phoneText.compoundDrawables[2]
+                if (rightDrawable != null && event.x >= (phoneText.width - phoneText.paddingRight - rightDrawable.bounds.width() - 40)) {
+                    if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                        return@setOnTouchListener true
+                    }
+                    if (event.action == android.view.MotionEvent.ACTION_UP) {
+                        val popupBinding = com.example.businesscardscanner.databinding.LayoutPhonePopupBinding.inflate(LayoutInflater.from(context))
+                        val popupWindow = android.widget.PopupWindow(
+                            popupBinding.root,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            true
+                        )
+                        popupWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                        
+                        popupBinding.actionCall.setOnClickListener {
+                            val number = phoneNumber.trim()
+                            if (number.isNotBlank()) {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
+                        }
+                        popupBinding.actionWhatsapp.setOnClickListener {
+                            val number = phoneNumber.trim()
+                            if (number.isNotBlank()) {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://api.whatsapp.com/send?phone=$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "WhatsApp not found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
+                        }
+                        popupBinding.actionMessenger.setOnClickListener {
+                            val number = phoneNumber.trim()
+                            if (number.isNotBlank()) {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "Messenger/SMS not found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
+                        }
+                        
+                        popupBinding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                        val xOffset = -popupBinding.root.measuredWidth + phoneText.width
+                        popupWindow.showAsDropDown(phoneText, xOffset, 0)
+                        v.performClick()
+                        return@setOnTouchListener true
+                    }
+                }
+                false
             }
         }
         
-        binding.btnActionSmsPreview.setOnClickListener {
-            val number = card.phone.trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
+        setupPhonePopup(txtPhone, card.phone)
+        setupPhonePopup(txtPhoneSecondary, card.phoneSecondary)
+        
+        txtEmail.setOnTouchListener { v, event ->
+            val rightDrawable = txtEmail.compoundDrawables[2]
+            if (rightDrawable != null && event.x >= (txtEmail.width - txtEmail.paddingRight - rightDrawable.bounds.width() - 40)) {
+                if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                    return@setOnTouchListener true
+                }
+                if (event.action == android.view.MotionEvent.ACTION_UP) {
+                    val email = card.email.trim()
+                    if (email.isNotBlank()) {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:$email"))
+                        try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No email app found", android.widget.Toast.LENGTH_SHORT).show() }
+                    }
+                    v.performClick()
+                    return@setOnTouchListener true
+                }
             }
+            false
         }
         
-        binding.btnActionCallSecondaryPreview.setOnClickListener {
-            val number = card.phoneSecondary.trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+        txtLocation.setOnTouchListener { v, event ->
+            val rightDrawable = txtLocation.compoundDrawables[2]
+            if (rightDrawable != null && event.x >= (txtLocation.width - txtLocation.paddingRight - rightDrawable.bounds.width() - 40)) {
+                if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                    return@setOnTouchListener true
+                }
+                if (event.action == android.view.MotionEvent.ACTION_UP) {
+                    val address = card.address.trim()
+                    if (address.isNotBlank()) {
+                        val encoded = android.net.Uri.encode(address)
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=$encoded"))
+                        try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
+                    }
+                    v.performClick()
+                    return@setOnTouchListener true
+                }
             }
-        }
-        
-        binding.btnActionSmsSecondaryPreview.setOnClickListener {
-            val number = card.phoneSecondary.trim()
-            if (number.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No messaging app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnActionEmailPreview.setOnClickListener {
-            val email = card.email.trim()
-            if (email.isNotBlank()) {
-                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:$email"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No email app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
-        }
-        
-        binding.btnActionMapPreview.setOnClickListener {
-            val address = card.address.trim()
-            if (address.isNotBlank()) {
-                val encoded = android.net.Uri.encode(address)
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=$encoded"))
-                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
-            }
+            false
         }
         
         binding.btnSaveToContactsPreview.setOnClickListener {

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="14dp"
-    app:cardBackgroundColor="@color/Background"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="18dp"
     app:cardElevation="0dp"
     app:strokeColor="#EEF0F4"
@@ -112,7 +112,7 @@
                 android:backgroundTint="@null"
                 android:text="Delete Permanent"
                 android:textAllCaps="false"
-                android:textColor="@color/Background" />
+                android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

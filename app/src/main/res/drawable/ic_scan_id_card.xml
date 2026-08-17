@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Top-left bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7,4H5C4.45,4 4,4.45 4,5V7H6V6H7V4Z" />
+    
+    <!-- Top-right bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,4H17V6H18V7H20V5C20,4.45 19.55,4 19,4Z" />
+
+    <!-- Bottom-left bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7,20H5C4.45,20 4,19.55 4,19V17H6V18H7V20Z" />
+
+    <!-- Bottom-right bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,20H17V18H18V17H20V19C20,19.55 19.55,20 19,20Z" />
+
+    <!-- ID Card shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,7H8C7.45,7 7,7.45 7,8V16C7,16.55 7.45,17 8,17H16C16.55,17 17,16.55 17,16V8C17,7.45 16.55,7 16,7ZM10.5,9.5C11.33,9.5 12,10.17 12,11C12,11.83 11.33,12.5 10.5,12.5C9.67,12.5 9,11.83 9,11C9,10.17 9.67,9.5 10.5,9.5ZM13.5,14.5H7.5V13.75C7.5,12.92 9.17,12.5 10.5,12.5C11.83,12.5 13.5,12.92 13.5,13.75V14.5ZM15,14H14V13H15V14ZM15,12H14V11H15V12ZM15,10H14V9H15V10Z" />
+</vector>

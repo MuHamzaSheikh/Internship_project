@@ -102,6 +102,19 @@ object BusinessCardOcrParser {
             phoneRawMatchesForExclusion.add(rawStr)
         }
         
+        // Also use our regex fallback for numbers libphonenumber might miss (e.g. local numbers without country code on incorrect locale)
+        val phoneRegexMatches = phoneRegex.findAll(rawText).map { it.value }.distinct().toList()
+        for (match in phoneRegexMatches) {
+            // Check if this match is already in our exclusion list to avoid duplicates
+            if (phoneRawMatchesForExclusion.none { it.contains(match) || match.contains(it) }) {
+                val formatted = match.replace(Regex("[^0-9+\\s().-]"), "").trim()
+                if (formatted.count { it.isDigit() } >= 7) {
+                    validPhoneNumbers.add(formatted)
+                    phoneRawMatchesForExclusion.add(match)
+                }
+            }
+        }
+        
         val validPhonesDistinct = validPhoneNumbers.distinct()
 
         val socialRaw = socialRegex.findAll(rawText).map { it.value }.distinct().toList()
@@ -208,8 +221,8 @@ object BusinessCardOcrParser {
             val isJobKeyword = containsAny(block.text.lowercase(), jobTitleKeywords)
             val isServiceDescription = nameBlock != null && block.y > nameBlock.y && block.y < nameBlock.y + nameBlock.height * 3 && block.height < nameBlock.height && !containsAny(block.text.lowercase(), companyKeywords)
             (isJobKeyword || isServiceDescription) && 
-            block.text.length in 4..35 && 
-            !block.text.any { it.isDigit() }
+            block.text.length in 2..50 && 
+            block.text.count { it.isDigit() } <= 2
         }
 
         // Step C: Address fallback
@@ -433,6 +446,8 @@ object BusinessCardOcrParser {
         if (trimmed.length !in 2..60) return 0
         var score = 30
         if (containsAny(lower, companyKeywords)) score += 45
+        if (containsAny(lower, addressKeywords)) score -= 20
+        if (containsAny(lower, jobTitleKeywords)) score -= 20
         if (trimmed == trimmed.uppercase() && trimmed.any { it.isLetter() }) score += 10
         if (trimmed.any { it.isDigit() }) score += 5
         if (trimmed.split(Regex("\\s+")).size <= 4) score += 5

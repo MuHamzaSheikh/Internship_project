@@ -42,6 +42,8 @@ class FamilyFragment : Fragment() {
                     val scoped = cards.filter { it.group.equals("Family", true) }
                     allCards = scoped
                     val filtered = CardListSearchUtils.filter(scoped, currentQuery)
+                    binding.emptyView.visibility = if (filtered.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+                    binding.recyclerView.visibility = if (filtered.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
                     binding.recyclerView.adapter = BusinessCardAdapter(
                         filtered,
                         onCardClick = { startActivity(CardPreviewActivity.createIntent(requireContext(), it.id)) },
@@ -89,10 +91,10 @@ class FamilyFragment : Fragment() {
     fun updateSearch(query: String) {
         currentQuery = query
         if (_binding != null) {
-            (binding.recyclerView.adapter as? BusinessCardAdapter)?.let { adapter ->
-                val filtered = CardListSearchUtils.filter(allCards, currentQuery)
-                adapter.updateItems(filtered)
-            }
+            val filtered = CardListSearchUtils.filter(allCards, currentQuery)
+            binding.emptyView.visibility = if (filtered.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+            binding.recyclerView.visibility = if (filtered.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+            (binding.recyclerView.adapter as? BusinessCardAdapter)?.updateItems(filtered)
         }
     }
 

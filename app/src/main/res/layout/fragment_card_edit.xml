@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/Background"
+    android:background="@color/Surface"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,6 +18,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_back"
+            app:tint="@color/TextPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,7 +47,8 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPreviewContainer"
             android:layout_width="0dp"
-            android:layout_height="232dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="373:232"
             android:layout_marginStart="20dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp"
@@ -77,13 +79,10 @@
             app:maxImageSize="24dp"
             app:elevation="4dp"
             android:contentDescription="Retake Image"
-            app:layout_constraintCircle="@id/cardPreviewContainer"
-            app:layout_constraintCircleAngle="135"
-            app:layout_constraintCircleRadius="0dp"
             app:layout_constraintBottom_toBottomOf="@id/cardPreviewContainer"
             app:layout_constraintEnd_toEndOf="@id/cardPreviewContainer"
-            android:layout_marginEnd="-8dp"
-            android:layout_marginBottom="-8dp" />
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/pageDots"
@@ -127,28 +126,29 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Group Tag" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/etGroup"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/edit_text_outline"
-                android:drawableEnd="@drawable/ic_dropdown_arrow"
-                android:drawablePadding="8dp"
-                android:hint="VIP"
-                android:paddingStart="12dp"
-                android:paddingEnd="36dp"
-                android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary"
-                android:inputType="textNoSuggestions"
-                android:focusable="false"
-                android:clickable="true" />
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/etGroup"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/edit_text_outline"
+            android:drawableEnd="@drawable/ic_dropdown_arrow"
+            android:drawablePadding="8dp"
+            android:hint="Select Group"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/TextPrimary"
+            android:textColorHint="@color/TextSecondary"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="false"
+            android:inputType="none" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Name" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Michal Smith" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" />
+            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Name" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Job Title" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Michal Smith" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary" />
+            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="Job Title" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Company" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -157,7 +157,7 @@
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Michal Smith"
+                android:hint="Company Name"
                 android:inputType="textCapWords"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
@@ -171,7 +171,23 @@
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="0123456789"
+                android:hint="Phone Number"
+                android:inputType="phone"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:drawableEnd="@drawable/ic_dropdown_arrow"
+                android:drawablePadding="8dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Phone 2 (Optional)" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etPhoneSecondary"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="Phone Number"
                 android:inputType="phone"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
@@ -189,21 +205,43 @@
                 android:layout_height="44dp"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Michal Smith"
+                android:hint="Email Address"
                 android:inputType="textEmailAddress"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
+                android:drawableEnd="@drawable/ic_email"
+                android:drawablePadding="8dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Address" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
-                android:id="@+id/etAddress"
+                android:id="@+id/etLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:background="@drawable/edit_text_outline"
-                android:hint="Building # 123, 1st Floor Apartment no 101"
+                android:hint="Location"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:minHeight="44dp"
+                android:minLines="2"
+                android:paddingStart="12dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="12dp"
+                android:drawableEnd="@drawable/ic_map"
+                android:drawablePadding="8dp"
+                android:textColor="@color/TextPrimary"
+                android:textColorHint="@color/TextSecondary" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Extra Information" android:textColor="@color/TextPrimary" android:textSize="13sp" />
+            <EditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/edit_text_outline"
+                android:hint="Any other extracted text"
                 android:inputType="textMultiLine|textNoSuggestions"
                 android:minHeight="44dp"
                 android:minLines="2"
@@ -213,35 +251,21 @@
                 android:paddingBottom="12dp"
                 android:textColor="@color/TextPrimary"
                 android:textColorHint="@color/TextSecondary" />
-                        <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText
-                android:id="@+id/etLocation"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/edit_text_outline"
-                android:hint="Street,123 New City"
-                android:inputType="text"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:drawableEnd="@drawable/ic_map"
-                android:drawablePadding="8dp"
-                android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
         </LinearLayout>
-
-                <Button
+        <Button
             android:id="@+id/btnSaveCard"
-            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             android:text="Save Card"
             android:textAllCaps="false"
-            android:textColor="@color/TextPrimary"
-            app:strokeColor="@color/PrimaryBlue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="26dp"
+            app:backgroundTint="@color/PrimaryBlue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/formBlock" />

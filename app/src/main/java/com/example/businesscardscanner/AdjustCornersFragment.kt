@@ -109,7 +109,7 @@ class AdjustCornersFragment : Fragment() {
                         override fun onGlobalLayout() {
                             if (binding.imgRawPreview.width > 0 && binding.imgRawPreview.height > 0) {
                                 binding.imgRawPreview.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                                setupPolygon(detectedCorners)
+                                setupPolygon(detectedCorners.corners)
                             }
                         }
                     })

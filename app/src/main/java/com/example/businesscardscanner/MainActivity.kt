@@ -70,6 +70,21 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_search -> {
                     val searchItem = item
                     searchView = searchItem.actionView as? SearchView
+                    
+                    searchItem.setOnActionExpandListener(object : android.view.MenuItem.OnActionExpandListener {
+                        override fun onMenuItemActionExpand(item: android.view.MenuItem): Boolean {
+                            findViewById<android.view.View>(R.id.cardScan).visibility = android.view.View.GONE
+                            findViewById<android.view.View>(R.id.tabCategories).visibility = android.view.View.GONE
+                            return true
+                        }
+
+                        override fun onMenuItemActionCollapse(item: android.view.MenuItem): Boolean {
+                            findViewById<android.view.View>(R.id.cardScan).visibility = android.view.View.VISIBLE
+                            findViewById<android.view.View>(R.id.tabCategories).visibility = android.view.View.VISIBLE
+                            return true
+                        }
+                    })
+
                     searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                         override fun onQueryTextSubmit(query: String?): Boolean = false
 
@@ -116,8 +131,10 @@ class MainActivity : AppCompatActivity() {
         val selectedLabel = tabLayout.getTabAt(currentTabPosition)?.text?.toString()
         tabLayout.clearOnTabSelectedListeners()
         tabLayout.removeAllTabs()
-        val tabs = mutableListOf("All", "Recents", "Colleague", "VIP", "Family")
-        categories.filterNot { tabs.any { default -> default.equals(it, true) } }.forEach { tabs.add(it) }
+        val tabs = mutableListOf("All", "Recent", "Colleague", "VIP", "Family")
+        categories
+            .filterNot { cat -> tabs.any { it.equals(cat, true) } || cat.equals("+ Add new category", true) }
+            .forEach { tabs.add(it) }
         tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it)) }
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {

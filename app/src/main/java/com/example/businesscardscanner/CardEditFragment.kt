@@ -35,7 +35,7 @@ class CardEditFragment : Fragment() {
 
     interface FlowHost {
         fun onFinishFlow()
-        fun onRetakeRequested(isBackSide: Boolean)
+        fun onRetakeRequested(side: com.example.businesscardscanner.viewmodel.CaptureSide, retakeBoth: Boolean)
     }
 
     private var _binding: com.example.businesscardscanner.databinding.FragmentCardEditBinding? = null
@@ -68,20 +68,7 @@ class CardEditFragment : Fragment() {
             dots.visibility = if (count > 1) View.VISIBLE else View.GONE
         }
 
-        fun applyPreviewAspect(uri: android.net.Uri?) {
-            if (uri == null) return
-            val ratio = ImageAspectRatioUtils.getAspectRatio(requireContext(), uri).takeIf { it > 0f } ?: 1f
-            val widthPx = previewContainer.width.takeIf { it > 0 }
-                ?: (resources.displayMetrics.widthPixels - (32 * resources.displayMetrics.density).roundToInt())
-            val heightPx = (widthPx / ratio).roundToInt().coerceAtLeast((160 * resources.displayMetrics.density).roundToInt())
-            
-            if (previewContainer.layoutParams.height != heightPx) {
-                previewContainer.layoutParams = previewContainer.layoutParams.apply { this.height = heightPx }
-                previewContainer.requestLayout()
-                pager.layoutParams = pager.layoutParams.apply { this.height = heightPx }
-                pager.requestLayout()
-            }
-        }
+
 
         fun bindImages(images: List<android.net.Uri?>) {
             currentImages = images
@@ -89,39 +76,43 @@ class CardEditFragment : Fragment() {
             pager.setCurrentItem(0, false)
             TabLayoutMediator(binding.pageDots, pager) { _, _ -> }.attach()
             updateDots(images.size, 0)
-            previewContainer.post { applyPreviewAspect(images.firstOrNull()) }
             
             val isQrMode = images.isEmpty()
             binding.cardPreviewContainer.visibility = if (isQrMode) View.GONE else View.VISIBLE
             binding.pageDots.visibility = if (isQrMode) View.GONE else (if (images.size > 1) View.VISIBLE else View.GONE)
             
-            if (isQrMode) View.GONE else View.VISIBLE
-            
-            
-            if (isQrMode) {
-                binding.btnSaveCard.setBackgroundResource(R.drawable.edit_text_outline)
-                binding.btnSaveCard.setTextColor(ContextCompat.getColor(requireContext(), R.color.TextPrimary))
-            } else {
-                binding.btnSaveCard.setBackgroundResource(R.drawable.btn_skip)
-            }
+            val shouldShowRetake = !isQrMode && cardId == null
+            binding.btnRetake.visibility = if (shouldShowRetake) View.VISIBLE else View.GONE
         }
 
-        groupField.setOnClickListener { groupField.showDropDown() }
-        groupField.setOnItemClickListener { _, _, position, _ ->
-            val value = groupField.adapter?.getItem(position)?.toString().orEmpty()
-            when (value) {
-                "+ Add new category" -> showAddCategoryDialog(groupField, repository)
-                else -> if (value.isNotBlank()) groupField.setText(value, false)
-            }
+        var groupMenu: android.widget.PopupMenu? = null
+        
+        groupField.setOnClickListener {
+            groupMenu?.show()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             repository.observeCategories().collectLatest { categories ->
-                val options = (listOf("VIP", "Family", "Colleague", "Recent") + categories + "+ Add new category")
-                    .distinct()
-                groupField.setSimpleItems(options.toTypedArray())
+                val options = (listOf("VIP", "Family", "Colleague", "Recent") + categories + "+ Add new category").distinct()
+                
+                groupMenu = android.widget.PopupMenu(requireContext(), groupField, android.view.Gravity.END).apply {
+                    options.forEachIndexed { index, option ->
+                        menu.add(android.view.Menu.NONE, index, index, option)
+                    }
+                    setOnMenuItemClickListener { item ->
+                        val value = options[item.itemId]
+                        if (value == "+ Add new category") {
+                            groupField.setText("")
+                            showAddCategoryDialog(groupField, repository)
+                        } else if (value.isNotBlank()) {
+                            groupField.setText(value)
+                        }
+                        true
+                    }
+                }
+                
                 if (groupField.text.isNullOrBlank()) {
-                    groupField.setText("VIP", false)
+                    groupField.setText("VIP")
                 }
             }
         }
@@ -129,7 +120,6 @@ class CardEditFragment : Fragment() {
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 updateDots(currentImages.size, position)
-                applyPreviewAspect(currentImages.getOrNull(position))
             }
         })
 
@@ -139,7 +129,7 @@ class CardEditFragment : Fragment() {
                     existingCard = card
                     bindCard(view, card)
                     bindImages(listOfNotNull(card.imageUri, card.backImageUri))
-                    groupField.setText(card.group.ifBlank { "VIP" }, false)
+                    groupField.setText(card.group.ifBlank { "VIP" })
                 } ?: bindFromState(view, state, ::bindImages)
             }
         } else {
@@ -164,7 +154,10 @@ class CardEditFragment : Fragment() {
         setupQuickActions(view)
 
         binding.btnSaveCard.setOnClickListener {
-            val selectedGroup = groupField.text?.toString().orEmpty().ifBlank { "VIP" }
+            var selectedGroup = groupField.text?.toString().orEmpty().trim()
+            if (selectedGroup.isBlank() || selectedGroup.equals("+ Add new category", ignoreCase = true)) {
+                selectedGroup = "VIP"
+            }
             viewLifecycleOwner.lifecycleScope.launch {
                 repository.saveCategory(selectedGroup)
                 val card = existingCard?.copy(
@@ -173,7 +166,9 @@ class CardEditFragment : Fragment() {
                     jobTitle = binding.etJob.text.toString(),
                     company = binding.etCompany.text.toString(),
                     phone = binding.etPhone.text.toString(),
-                    description = binding.etLocation.text.toString(),
+                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
+                    description = binding.etDescription.text.toString(),
+                    address = binding.etLocation.text.toString(),
                     updatedAt = System.currentTimeMillis()
                 ) ?: BusinessCard(
                     id = cardId ?: state.pendingCard?.id ?: BusinessCard().id,
@@ -183,7 +178,9 @@ class CardEditFragment : Fragment() {
                     jobTitle = binding.etJob.text.toString(),
                     company = binding.etCompany.text.toString(),
                     phone = binding.etPhone.text.toString(),
-                    description = binding.etLocation.text.toString(),
+                    phoneSecondary = binding.etPhoneSecondary.text.toString(),
+                    description = binding.etDescription.text.toString(),
+                    address = binding.etLocation.text.toString(),
                     group = selectedGroup,
                     qrText = state.qrText,
                     qrTimestamp = state.qrTimestamp,
@@ -197,60 +194,100 @@ class CardEditFragment : Fragment() {
         }
 
         binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         
         binding.btnRetake.setOnClickListener {
-            val isBackSide = pager.currentItem == 1
-            (activity as? FlowHost)?.onRetakeRequested(isBackSide)
+            val options = arrayOf("Retake Front Side", "Retake Back Side", "Retake Both Sides")
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Retake Picture")
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> (activity as? FlowHost)?.onRetakeRequested(com.example.businesscardscanner.viewmodel.CaptureSide.FRONT, false)
+                        1 -> (activity as? FlowHost)?.onRetakeRequested(com.example.businesscardscanner.viewmodel.CaptureSide.BACK, false)
+                        2 -> (activity as? FlowHost)?.onRetakeRequested(com.example.businesscardscanner.viewmodel.CaptureSide.FRONT, true)
+                    }
+                }
+                .show()
         }
     }
     
     private fun setupQuickActions(view: View) {
         val context = requireContext()
         val etPhone = binding.etPhone
+        val etPhoneSecondary = binding.etPhoneSecondary
+        val etEmail = binding.etEmail
         val etLocation = binding.etLocation
         
-        etPhone.setOnTouchListener { v, event ->
-            if (event.action == android.view.MotionEvent.ACTION_UP) {
-                if (event.rawX >= (etPhone.right - etPhone.compoundDrawables[2].bounds.width() - 40)) {
-                    val popupBinding = com.example.businesscardscanner.databinding.LayoutPhonePopupBinding.inflate(LayoutInflater.from(context))
-                    val popupWindow = android.widget.PopupWindow(
-                        popupBinding.root,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        true
-                    )
-                    popupWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-                    
-                    popupBinding.actionCall.setOnClickListener {
-                        val number = etPhone.text.toString().trim()
-                        if (number.isNotBlank()) {
-                            val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:"))
-                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
-                        }
-                        popupWindow.dismiss()
+        fun setupPhonePopup(phoneField: EditText) {
+            phoneField.setOnTouchListener { v, event ->
+                val rightDrawable = phoneField.compoundDrawables[2]
+                if (rightDrawable != null && event.x >= (phoneField.width - phoneField.paddingRight - rightDrawable.bounds.width() - 40)) {
+                    if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                        return@setOnTouchListener true
                     }
-                    popupBinding.actionWhatsapp.setOnClickListener {
-                        val number = etPhone.text.toString().trim()
-                        if (number.isNotBlank()) {
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://api.whatsapp.com/send?phone="))
-                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "WhatsApp not found", android.widget.Toast.LENGTH_SHORT).show() }
+                    if (event.action == android.view.MotionEvent.ACTION_UP) {
+                        val popupBinding = com.example.businesscardscanner.databinding.LayoutPhonePopupBinding.inflate(LayoutInflater.from(context))
+                        val popupWindow = android.widget.PopupWindow(
+                            popupBinding.root,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            true
+                        )
+                        popupWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                        
+                        popupBinding.actionCall.setOnClickListener {
+                            val number = phoneField.text.toString().trim()
+                            if (number.isNotBlank()) {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No dialer found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
                         }
-                        popupWindow.dismiss()
-                    }
-                    popupBinding.actionMessenger.setOnClickListener {
-                        val number = etPhone.text.toString().trim()
-                        if (number.isNotBlank()) {
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("fb-messenger://user-thread/"))
-                            try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "Messenger not found", android.widget.Toast.LENGTH_SHORT).show() }
+                        popupBinding.actionWhatsapp.setOnClickListener {
+                            val number = phoneField.text.toString().trim()
+                            if (number.isNotBlank()) {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://api.whatsapp.com/send?phone=$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "WhatsApp not found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
                         }
-                        popupWindow.dismiss()
+                        popupBinding.actionMessenger.setOnClickListener {
+                            val number = phoneField.text.toString().trim()
+                            if (number.isNotBlank()) {
+                                // Fallback to SMS if messenger not specifically supported via intent easily
+                                val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:$number"))
+                                try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "Messenger/SMS not found", android.widget.Toast.LENGTH_SHORT).show() }
+                            }
+                            popupWindow.dismiss()
+                        }
+                        
+                        popupBinding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                        val xOffset = -popupBinding.root.measuredWidth + phoneField.width
+                        popupWindow.showAsDropDown(phoneField, xOffset, 0)
+                        v.performClick()
+                        return@setOnTouchListener true
                     }
-                    
-                    popupBinding.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-                    val xOffset = -popupBinding.root.measuredWidth + etPhone.width
-                    popupWindow.showAsDropDown(etPhone, xOffset, 0)
+                }
+                false
+            }
+        }
+        
+        setupPhonePopup(etPhone)
+        setupPhonePopup(etPhoneSecondary)
+        
+        etEmail.setOnTouchListener { v, event ->
+            val rightDrawable = etEmail.compoundDrawables[2]
+            if (rightDrawable != null && event.x >= (etEmail.width - etEmail.paddingRight - rightDrawable.bounds.width() - 40)) {
+                if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                    return@setOnTouchListener true
+                }
+                if (event.action == android.view.MotionEvent.ACTION_UP) {
+                    val email = etEmail.text.toString().trim()
+                    if (email.isNotBlank()) {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:$email"))
+                        try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No email app found", android.widget.Toast.LENGTH_SHORT).show() }
+                    }
                     v.performClick()
                     return@setOnTouchListener true
                 }
@@ -259,12 +296,16 @@ class CardEditFragment : Fragment() {
         }
         
         etLocation.setOnTouchListener { v, event ->
-            if (event.action == android.view.MotionEvent.ACTION_UP) {
-                if (event.rawX >= (etLocation.right - etLocation.compoundDrawables[2].bounds.width() - 40)) {
+            val rightDrawable = etLocation.compoundDrawables[2]
+            if (rightDrawable != null && event.x >= (etLocation.width - etLocation.paddingRight - rightDrawable.bounds.width() - 40)) {
+                if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                    return@setOnTouchListener true
+                }
+                if (event.action == android.view.MotionEvent.ACTION_UP) {
                     val address = etLocation.text.toString().trim()
                     if (address.isNotBlank()) {
                         val encoded = android.net.Uri.encode(address)
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q="))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:0,0?q=$encoded"))
                         try { startActivity(intent) } catch (e: Exception) { android.widget.Toast.makeText(context, "No maps app found", android.widget.Toast.LENGTH_SHORT).show() }
                     }
                     v.performClick()
@@ -347,8 +388,8 @@ class CardEditFragment : Fragment() {
         bindOcrField(binding.etCompany, pickField(front?.company, back?.company))
         bindOcrField(binding.etPhone, pickField(front?.phone, back?.phone))
         bindOcrField(binding.etEmail, pickField(front?.email, back?.email))
-        bindOcrField(binding.etAddress, pickField(front?.address, back?.address))
-        bindOcrField(binding.etLocation, pickField(front?.description, back?.description))
+        bindOcrField(binding.etLocation, pickField(front?.address, back?.address))
+        bindOcrField(binding.etDescription, pickField(front?.description, back?.description))
     }
 
     private fun bindCard(view: View, card: BusinessCard) {
@@ -357,9 +398,10 @@ class CardEditFragment : Fragment() {
         binding.etJob.setText(card.jobTitle)
         binding.etCompany.setText(card.company)
         binding.etPhone.setText(card.phone)
+        binding.etPhoneSecondary.setText(card.phoneSecondary)
         binding.etEmail.setText(card.email)
-        binding.etAddress.setText(card.address)
-        binding.etLocation.setText(card.description)
+        binding.etLocation.setText(card.address)
+        binding.etDescription.setText(card.description)
     }
 
     override fun onDestroyView() {
@@ -367,13 +409,13 @@ class CardEditFragment : Fragment() {
         _binding = null
     }
 
-    private fun bindOcrField(editText: EditText, field: OcrField?, defaultValue: String? = null) {
-        val current = editText.text?.toString().orEmpty()
+    private fun bindOcrField(textView: android.widget.TextView, field: OcrField?, defaultValue: String? = null) {
+        val current = textView.text?.toString().orEmpty()
         val value = field?.value.orEmpty().ifBlank { defaultValue.orEmpty() }
         if (current.isBlank() && value.isNotBlank()) {
-            editText.setText(value)
+            textView.setText(value)
         } else if (current.isBlank() && defaultValue != null) {
-            editText.setText(defaultValue)
+            textView.setText(defaultValue)
         }
     }
 
@@ -386,12 +428,15 @@ class CardEditFragment : Fragment() {
     }
 
     private fun showAddCategoryDialog(
-        groupField: MaterialAutoCompleteTextView,
+        groupField: android.widget.TextView,
         repository: BusinessCardRepository
     ) {
         val input = TextInputEditText(requireContext()).apply {
             hint = "Category name"
-            setText(groupField.text?.toString().orEmpty())
+            val currentText = groupField.text?.toString().orEmpty()
+            if (!currentText.equals("+ Add new category", ignoreCase = true)) {
+                setText(currentText)
+            }
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Add new category")
@@ -401,7 +446,7 @@ class CardEditFragment : Fragment() {
                 if (newCategory.isNotBlank()) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         repository.saveCategory(newCategory)
-                        groupField.setText(newCategory, false)
+                        groupField.setText(newCategory)
                     }
                 }
                 dialog.dismiss()

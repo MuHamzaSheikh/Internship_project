@@ -40,7 +40,7 @@ class BusinessCardAdapter(
                 crossfade(true)
                 transformations(coil.transform.CircleCropTransformation())
             }
-            tvName.text = card.name
+            tvName.text = card.name.ifBlank { "Unknown" }
             tvRole.text = card.jobTitle.ifBlank { card.company }
             tvPhone.text = card.phone
             tvCategory.text = card.group

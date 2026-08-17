@@ -1,0 +1,47 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+
+    <!-- Top Left Bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,30h20v6H36v14h-6V30z" />
+        
+    <!-- Top Right Bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M130,30h-20v6h14v14h6V30z" />
+
+    <!-- Bottom Left Bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,130h20v-6H36v-14h-6V130z" />
+
+    <!-- Bottom Right Bracket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M130,130h-20v-6h14v-14h6V130z" />
+
+    <!-- Business Card Base -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,56h80c3.31,0 6,2.69 6,6v36c0,3.31 -2.69,6 -6,6H40c-3.31,0 -6,-2.69 -6,-6V62c0,-3.31 2.69,-6 6,-6zM40,62v8h80v-8H40zM40,78v20h80V78H40z" />
+
+    <!-- Card Inner Rect 1 (Profile photo placeholder) -->
+    <path
+        android:fillColor="#F0F0F0"
+        android:pathData="M48,84h12c2.2,0 4,1.8 4,4v4c0,2.2 -1.8,4 -4,4H48c-2.2,0 -4,-1.8 -4,-4v-4c0,-2.2 1.8,-4 4,-4z" />
+
+    <!-- Card Inner Line 1 (Name placeholder) -->
+    <path
+        android:fillColor="#F0F0F0"
+        android:pathData="M78,84h30c1.65,0 3,1.35 3,3v0c0,1.65 -1.35,3 -3,3H78c-1.65,0 -3,-1.35 -3,-3v0c0,-1.65 1.35,-3 3,-3z" />
+
+    <!-- Card Inner Line 2 (Subtitle placeholder) -->
+    <path
+        android:fillColor="#F0F0F0"
+        android:pathData="M78,92h30c1.65,0 3,1.35 3,3v0c0,1.65 -1.35,3 -3,3H78c-1.65,0 -3,-1.35 -3,-3v0c0,-1.65 1.35,-3 3,-3z" />
+
+</vector>

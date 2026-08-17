@@ -30,8 +30,17 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("auto_resume", isChecked).apply()
         }
 
+        val languages = arrayOf("English", "Urdu", "Spanish", "French", "German", "Chinese")
         binding.btnLanguages.setOnClickListener {
-            Toast.makeText(this, "Language settings coming soon!", Toast.LENGTH_SHORT).show()
+            val currentLangIndex = prefs.getInt("selected_language", 0)
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Select Language")
+                .setSingleChoiceItems(languages, currentLangIndex) { dialog, which ->
+                    prefs.edit().putInt("selected_language", which).apply()
+                    Toast.makeText(this, "${languages[which]} selected", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+                .show()
         }
 
         binding.btnPrivacyPolicy.setOnClickListener {

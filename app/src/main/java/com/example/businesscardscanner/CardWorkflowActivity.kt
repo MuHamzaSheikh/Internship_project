@@ -113,50 +113,70 @@ class CardWorkflowActivity : AppCompatActivity(),
     // ==============================
 
     override fun onCaptureBackRequested() {
-        // Trigger OCR for the front side before moving to back capture
-        triggerOcrForCurrentSide()
         flowViewModel.setCaptureMode(CaptureMode.CARD)
         flowViewModel.setCaptureSide(com.example.businesscardscanner.viewmodel.CaptureSide.BACK)
         showStep(CaptureFragment.newInstance(captureSide = com.example.businesscardscanner.viewmodel.CaptureSide.BACK))
     }
 
     override fun onSkipBackCapture() {
-        triggerOcrForCurrentSide()
+        flowViewModel.setRetaking(false, false) // Reset state
         flowViewModel.setCaptureSide(com.example.businesscardscanner.viewmodel.CaptureSide.FRONT)
-        showStep(CardEditFragment.newInstance(intent.getStringExtra(EXTRA_CARD_ID)))
+        triggerOcrForBothSides()
     }
 
     override fun onCaptureDoneNext() {
-        triggerOcrForCurrentSide()
-        showStep(CardEditFragment.newInstance(intent.getStringExtra(EXTRA_CARD_ID)))
+        flowViewModel.setRetaking(false, false) // Reset state
+        triggerOcrForBothSides()
     }
     
-    private fun triggerOcrForCurrentSide() {
-        val uri = flowViewModel.state.value.getOcrSourceImage()
-        if (uri != null) {
-            flowViewModel.setProcessing(true)
-            lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                extractText(uri)
-            }
+    private fun triggerOcrForBothSides() {
+        val state = flowViewModel.state.value
+        val frontUri = state.frontImageUri ?: state.ocrUri ?: state.imageUri
+        val backUri = state.backImageUri
+
+        if (frontUri == null && backUri == null) {
+            showStep(CardEditFragment.newInstance(intent.getStringExtra(EXTRA_CARD_ID)))
+            return
         }
-    }
 
+        flowViewModel.setProcessing(true)
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val appContext = applicationContext
+            var frontResult: com.example.businesscardscanner.ocr.OcrResult? = null
+            var backResult: com.example.businesscardscanner.ocr.OcrResult? = null
 
-    private suspend fun extractText(uri: android.net.Uri) {
-        val appContext = applicationContext
-        Log.d(PERF_TAG, "extractText: starting OCR for uri=$uri")
-        val result = kotlin.runCatching {
-            com.example.businesscardscanner.ocr.TextRecognitionManager(appContext).analyze(uri)
-        }.onFailure {
-            Log.e(PERF_TAG, "extractText: Exception caught during OCR analysis", it)
-        }.getOrNull()
+            if (frontUri != null) {
+                Log.d(PERF_TAG, "extractText: starting OCR for front uri=$frontUri")
+                frontResult = kotlin.runCatching {
+                    com.example.businesscardscanner.ocr.TextRecognitionManager(appContext).analyze(frontUri)
+                }.onFailure {
+                    Log.e(PERF_TAG, "extractText: Exception caught during front OCR analysis", it)
+                }.getOrNull()
+            }
 
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-            flowViewModel.setProcessing(false)
-            if (result != null && result.rawText.isNotBlank()) {
-                flowViewModel.setOcrResult(result)
-            } else {
-                flowViewModel.setError("Couldn't read this card clearly.")
+            if (backUri != null) {
+                Log.d(PERF_TAG, "extractText: starting OCR for back uri=$backUri")
+                backResult = kotlin.runCatching {
+                    com.example.businesscardscanner.ocr.TextRecognitionManager(appContext).analyze(backUri)
+                }.onFailure {
+                    Log.e(PERF_TAG, "extractText: Exception caught during back OCR analysis", it)
+                }.getOrNull()
+            }
+
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                if (frontResult != null && frontResult.rawText.isNotBlank()) {
+                    flowViewModel.setOcrResult(frontResult, com.example.businesscardscanner.viewmodel.CaptureSide.FRONT)
+                }
+                if (backResult != null && backResult.rawText.isNotBlank()) {
+                    flowViewModel.setOcrResult(backResult, com.example.businesscardscanner.viewmodel.CaptureSide.BACK)
+                }
+
+                if ((frontResult == null || frontResult.rawText.isBlank()) && (backResult == null || backResult.rawText.isBlank())) {
+                    flowViewModel.setError("Couldn't read this card clearly.")
+                }
+                
+                flowViewModel.setProcessing(false)
+                showStep(CardEditFragment.newInstance(intent.getStringExtra(EXTRA_CARD_ID)))
             }
         }
     }
@@ -169,9 +189,9 @@ class CardWorkflowActivity : AppCompatActivity(),
         finish()
     }
 
-    override fun onRetakeRequested(isBackSide: Boolean) {
+    override fun onRetakeRequested(side: com.example.businesscardscanner.viewmodel.CaptureSide, retakeBoth: Boolean) {
         flowViewModel.setCaptureMode(CaptureMode.CARD)
-        val side = if (isBackSide) com.example.businesscardscanner.viewmodel.CaptureSide.BACK else com.example.businesscardscanner.viewmodel.CaptureSide.FRONT
+        flowViewModel.setRetaking(isRetaking = true, bothSides = retakeBoth)
         flowViewModel.setCaptureSide(side)
         showStep(CaptureFragment.newInstance(captureSide = side))
     }

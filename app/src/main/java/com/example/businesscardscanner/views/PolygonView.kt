@@ -29,24 +29,42 @@ class PolygonView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val cornerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4F6BFF")
-        style = Paint.Style.FILL
-    }
-
-    private val pointerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val bracketPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         strokeWidth = 4f
         style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
     }
 
     private var points = mutableListOf<PointF>()
     private var draggedPoint: PointF? = null
     private val touchRadius = 80f // Radius to capture touch
     private val cornerRadius = 30f // Visual radius of the corner handles
+    
+    private var sourceBitmap: android.graphics.Bitmap? = null
+    private var imageMatrix: android.graphics.Matrix? = null
+
+    private val magBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 6f
+    }
+    
+    private val magCrosshairPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#4F6BFF") // PrimaryBlue
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+    }
 
     init {
         setWillNotDraw(false)
+    }
+
+    fun setMagnifierImage(bitmap: android.graphics.Bitmap, matrix: android.graphics.Matrix) {
+        sourceBitmap = bitmap
+        imageMatrix = matrix
+        invalidate()
     }
 
     fun setPoints(newPoints: List<PointF>) {
@@ -71,9 +89,48 @@ class PolygonView @JvmOverloads constructor(
             canvas.drawPath(path, fillPaint)
             canvas.drawPath(path, paint)
 
+            val cx = points.map { it.x }.average().toFloat()
+            val cy = points.map { it.y }.average().toFloat()
+            val bracketLength = 40f
+
             for (point in points) {
-                canvas.drawCircle(point.x, point.y, cornerRadius, cornerPaint)
-                canvas.drawCircle(point.x, point.y, cornerRadius, pointerPaint)
+                val pathBracket = android.graphics.Path()
+                val dx = if (point.x < cx) bracketLength else -bracketLength
+                val dy = if (point.y < cy) bracketLength else -bracketLength
+                
+                pathBracket.moveTo(point.x, point.y + dy)
+                pathBracket.lineTo(point.x, point.y)
+                pathBracket.lineTo(point.x + dx, point.y)
+                
+                canvas.drawPath(pathBracket, bracketPaint)
+            }
+        }
+        
+        draggedPoint?.let { dp ->
+            sourceBitmap?.let { bmp ->
+                imageMatrix?.let { mat ->
+                    val magRadius = 150f
+                    // Position magnifier above the finger, or below if too close to top
+                    val magY = if (dp.y - magRadius - 100f < 0) dp.y + magRadius + 100f else dp.y - magRadius - 100f
+                    val magX = dp.x
+
+                    canvas.save()
+                    val clipPath = android.graphics.Path().apply {
+                        addCircle(magX, magY, magRadius, android.graphics.Path.Direction.CW)
+                    }
+                    canvas.clipPath(clipPath)
+                    
+                    val magMatrix = android.graphics.Matrix(mat)
+                    magMatrix.postTranslate(magX - dp.x, magY - dp.y)
+                    magMatrix.postScale(2f, 2f, magX, magY)
+                    
+                    canvas.drawBitmap(bmp, magMatrix, null)
+                    canvas.restore()
+                    
+                    canvas.drawCircle(magX, magY, magRadius, magBorderPaint)
+                    canvas.drawLine(magX - 20f, magY, magX + 20f, magY, magCrosshairPaint)
+                    canvas.drawLine(magX, magY - 20f, magX, magY + 20f, magCrosshairPaint)
+                }
             }
         }
     }

@@ -21,6 +21,11 @@ import java.io.FileOutputStream
 object DocumentScanner {
     private const val TAG = "CardScannerDocScan"
 
+    data class DetectionResult(
+        val corners: Array<Point>?,
+        val isConfident: Boolean
+    )
+
     private data class ContourCandidate(
         val points: Array<Point>,
         val area: Double,
@@ -32,7 +37,8 @@ object DocumentScanner {
     )
 
     fun autoCrop(bitmap: Bitmap, cacheDir: File? = null): Bitmap {
-        val corners = detectCorners(bitmap, cacheDir)
+        val result = detectCorners(bitmap, cacheDir)
+        val corners = result.corners
         return if (corners != null && corners.size == 4) {
             val cropped = cropByCorners(bitmap, corners)
             if (cacheDir != null) {
@@ -230,24 +236,58 @@ object DocumentScanner {
      * This corner detection pipeline has broken silently multiple times. 
      * DO NOT MODIFY without running the QA_REGRESSION_PIPELINE.md checklist.
      */
-    fun detectCorners(bitmap: Bitmap, cacheDir: File? = null): Array<Point>? {
+    fun detectCorners(bitmap: Bitmap, cacheDir: File? = null): DetectionResult {
         Log.d("CardScannerDocScan", "PIPELINE INVOCATION: detectCorners started")
         val originalMat = Mat()
         Utils.bitmapToMat(bitmap, originalMat)
-        val candidates = findContourCandidates(originalMat, cacheDir)
-        originalMat.release()
-        val bestCandidate = candidates.firstOrNull()
 
-        if (bestCandidate == null) {
-            Log.d(TAG, "No valid contour found for document. Fallback failed as well.")
-            return null
+        // Downscale for robust detection (edges are too thick on 12MP images)
+        val maxDimension = 640.0
+        val width = originalMat.width().toDouble()
+        val height = originalMat.height().toDouble()
+        val scale = if (width > height) maxDimension / width else maxDimension / height
+        
+        val scaledMat = Mat()
+        var actualScaleX = 1.0
+        var actualScaleY = 1.0
+        if (scale < 1.0) {
+            Imgproc.resize(originalMat, scaledMat, Size(width * scale, height * scale))
+            actualScaleX = scaledMat.cols().toDouble() / width
+            actualScaleY = scaledMat.rows().toDouble() / height
+            Log.d(TAG, "detectCorners: Downscaled from ${width}x${height} to ${scaledMat.cols()}x${scaledMat.rows()}")
+            Log.d(TAG, "detectCorners: actualScaleX=$actualScaleX, actualScaleY=$actualScaleY")
+        } else {
+            originalMat.copyTo(scaledMat)
+            Log.d(TAG, "detectCorners: No downscaling, resolution is ${width}x${height}")
         }
 
-        Log.d(TAG, "Selected best candidate with score=${String.format("%.3f", bestCandidate.score)}, isStrict=${bestCandidate.isStrict}")
-        val points = bestCandidate.points
+        val candidates = findContourCandidates(scaledMat, cacheDir)
+        scaledMat.release()
+        originalMat.release()
+
+        val bestCandidate = candidates.firstOrNull()
+        if (bestCandidate == null) {
+            Log.d(TAG, "No valid contour found for document. Fallback failed as well.")
+            return DetectionResult(null, false)
+        }
+
+        // Determine confidence: if the first candidate is strong and much better than the second, we are confident.
+        val secondCandidate = candidates.getOrNull(1)
+        val isConfident = bestCandidate.score >= 0.7 && (secondCandidate == null || (bestCandidate.score - secondCandidate.score) > 0.25)
+
+        Log.d(TAG, "Selected best candidate with score=${String.format("%.3f", bestCandidate.score)}, isStrict=${bestCandidate.isStrict}, isConfident=$isConfident")
+        
+        // Scale points back up to the original image coordinates
+        val rawPointsStr = bestCandidate.points.joinToString { "(${it.x}, ${it.y})" }
+        Log.d(TAG, "Raw detected coordinates (in detection space): $rawPointsStr")
+        
+        val scaledPoints = bestCandidate.points.map { Point(it.x / actualScaleX, it.y / actualScaleY) }.toTypedArray()
+        val scaledPointsStr = scaledPoints.joinToString { "(${it.x}, ${it.y})" }
+        Log.d(TAG, "Scaled coordinates (in display/original space): $scaledPointsStr")
+        
         // Step 3 - Order Points
-        val orderedPoints = orderPointsForPerspectiveTransform(points)
-        return orderedPoints
+        val orderedPoints = orderPointsForPerspectiveTransform(scaledPoints)
+        return DetectionResult(orderedPoints, isConfident)
     }
 
     fun cropByCorners(bitmap: Bitmap, corners: Array<Point>): Bitmap {

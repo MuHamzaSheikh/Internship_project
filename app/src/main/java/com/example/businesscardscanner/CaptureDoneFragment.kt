@@ -40,6 +40,7 @@ class CaptureDoneFragment : Fragment() {
     private var rawBitmap: Bitmap? = null
     private var imageMatrix = Matrix()
     private var detectedCorners: Array<Point>? = null
+    private var isConfidentDetection = false
     
     // History for Undo/Redo
     private val history = mutableListOf<List<PointF>>()
@@ -290,20 +291,28 @@ class CaptureDoneFragment : Fragment() {
             }
 
             rawBitmap = bitmap
-            detectedCorners = DocumentScanner.detectCorners(bitmap)
+            val detectionResult = DocumentScanner.detectCorners(bitmap)
+            detectedCorners = detectionResult.corners
+            isConfidentDetection = detectionResult.isConfident
 
             withContext(Dispatchers.Main) {
-                transitionToCropState() // ALWAYS show crop state first
-                if (isAdded) {
-                    binding.imgRawPreview.setImageBitmap(bitmap)
-                    binding.imgRawPreview.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                        override fun onGlobalLayout() {
-                            if (binding.imgRawPreview.width > 0 && binding.imgRawPreview.height > 0) {
-                                binding.imgRawPreview.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                                setupPolygon(detectedCorners)
+                if (isConfidentDetection && detectedCorners != null) {
+                    // System Intelligence determined this is a confident single card. Auto-crop immediately!
+                    cropToFilterState(detectedCorners)
+                } else {
+                    // Multiple objects or ambiguous detection. Show manual adjustment to user.
+                    transitionToCropState()
+                    if (isAdded) {
+                        binding.imgRawPreview.setImageBitmap(bitmap)
+                        binding.imgRawPreview.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                            override fun onGlobalLayout() {
+                                if (binding.imgRawPreview.width > 0 && binding.imgRawPreview.height > 0) {
+                                    binding.imgRawPreview.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                                    setupPolygon(detectedCorners)
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -349,6 +358,7 @@ class CaptureDoneFragment : Fragment() {
         }
 
         binding.polygonView.setPoints(points)
+        binding.polygonView.setMagnifierImage(bitmap, imageMatrix)
         history.clear()
         saveStateToHistory()
     }
@@ -482,8 +492,17 @@ class CaptureDoneFragment : Fragment() {
             
             withContext(Dispatchers.Main) {
                 flowViewModel.setImageUri(croppedUri)
-                if (flowViewModel.state.value.captureSide == CaptureSide.FRONT) {
-                    showBackCaptureDialog()
+                val state = flowViewModel.state.value
+                if (state.captureSide == CaptureSide.FRONT) {
+                    if (state.isRetaking) {
+                        if (state.isRetakingBothSides) {
+                            (activity as? FlowHost)?.onCaptureBackRequested()
+                        } else {
+                            (activity as? FlowHost)?.onCaptureDoneNext()
+                        }
+                    } else {
+                        showBackCaptureDialog()
+                    }
                 } else {
                     (activity as? FlowHost)?.onCaptureDoneNext()
                 }
