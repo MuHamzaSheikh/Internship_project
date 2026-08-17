@@ -129,7 +129,6 @@
         android:paddingVertical="4dp"
         android:text="@string/str_front"
         android:textColor="#FFFFFF"
-        android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/bottomActions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

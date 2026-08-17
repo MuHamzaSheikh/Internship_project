@@ -142,13 +142,13 @@
             android:gravity="center_vertical"
             android:clickable="true"
             android:focusable="false"
-            android:inputType="none" />
+            android:inputType="none"  android:textSize="12sp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_name" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_name" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
+            <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_name" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"   android:textSize="12sp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_job_title" android:textColor="@color/TextPrimary" android:textSize="13sp" />
-            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_job_title" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"  android:textSize="12sp" />
+            <EditText android:id="@+id/etJob" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="44dp" android:layout_marginTop="6dp" android:background="@drawable/edit_text_outline" android:hint="@string/str_job_title" android:paddingStart="12dp" android:paddingEnd="12dp" android:textColor="@color/TextPrimary" android:textColorHint="@color/TextSecondary"   android:textSize="12sp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_company" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -162,7 +162,7 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
 
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -178,7 +178,7 @@
                 android:drawableEnd="@drawable/ic_dropdown_arrow"
                 android:drawablePadding="8dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
 
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_phone_2_optional" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -194,7 +194,7 @@
                 android:drawableEnd="@drawable/ic_dropdown_arrow"
                 android:drawablePadding="8dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
 
             
 
@@ -212,7 +212,7 @@
                 android:drawableEnd="@drawable/ic_email"
                 android:drawablePadding="8dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
 
             <TextView android:id="@+id/tvLocationLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_location" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -232,7 +232,7 @@
                 android:drawableEnd="@drawable/ic_map"
                 android:drawablePadding="8dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/str_extra_information" android:textColor="@color/TextPrimary" android:textSize="13sp" />
             <EditText
@@ -250,7 +250,7 @@
                 android:paddingEnd="12dp"
                 android:paddingBottom="12dp"
                 android:textColor="@color/TextPrimary"
-                android:textColorHint="@color/TextSecondary" />
+                android:textColorHint="@color/TextSecondary"  android:textSize="12sp"/>
         </LinearLayout>
         <Button
             android:id="@+id/btnSaveCard"

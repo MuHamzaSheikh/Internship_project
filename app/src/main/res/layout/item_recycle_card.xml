@@ -53,7 +53,7 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/str_marketing_manager"
                     android:textColor="@color/TextSecondary"
-                    android:textSize="12sp" />
+                    />
 
                 <TextView
                     android:id="@+id/tvRecyclePhone"
@@ -62,7 +62,7 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/str_000_12345_6789"
                     android:textColor="@color/TextSecondary"
-                    android:textSize="12sp" />
+                    />
 
                 <TextView
                     android:id="@+id/tvRecycleDate"
@@ -71,7 +71,7 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/str_today"
                     android:textColor="@color/TextSecondary"
-                    android:textSize="12sp" />
+                    />
 
                 <TextView
                     android:id="@+id/tvRecycleCategory"
@@ -80,7 +80,6 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/str_client"
                     android:textColor="@color/TextPrimary"
-                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
